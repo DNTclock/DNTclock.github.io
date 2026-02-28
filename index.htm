@@ -23,31 +23,51 @@ body {
 </head>
 <body>
 
-<div class="label">Обычное время (24 часа)</div>
+<div class="label">Обычное время WINAPI (24 часа)</div>
 <div id="normalClock" class="clock"></div>
 
 <div class="label">Десятичное время (10ч × 100 × 100)</div>
 <div id="decimalClock" class="clock"></div>
 
 <script>
+let baseTime = null; // точное UTC
+let lastFetch = null; // момент последнего обновления
+
+async function fetchUTCTime() {
+    try {
+        const res = await fetch('https://worldtimeapi.org/api/timezone/Etc/UTC');
+        const data = await res.json();
+        baseTime = new Date(data.utc_datetime);
+        lastFetch = Date.now();
+    } catch (err) {
+        console.error("Ошибка при получении времени:", err);
+        baseTime = new Date(); // fallback
+        lastFetch = Date.now();
+    }
+}
+
+// ===== Обновление часов =====
 function updateClocks() {
-    const now = new Date();
+    if (!baseTime) return; // ждём первый fetch
+
+    // сколько прошло миллисекунд с момента fetch
+    const delta = Date.now() - lastFetch;
+    const now = new Date(baseTime.getTime() + delta);
 
     // ===== Обычное время =====
-    const h = String(now.getHours()).padStart(2, '0');
-    const m = String(now.getMinutes()).padStart(2, '0');
-    const s = String(now.getSeconds()).padStart(2, '0');
+    const h = String(now.getUTCHours()).padStart(2, '0');
+    const m = String(now.getUTCMinutes()).padStart(2, '0');
+    const s = String(now.getUTCSeconds()).padStart(2, '0');
     document.getElementById("normalClock").textContent = `${h}:${m}:${s}`;
 
     // ===== Десятичное время =====
     const secondsSinceMidnight =
-        now.getHours() * 3600 +
-        now.getMinutes() * 60 +
-        now.getSeconds() +
-        now.getMilliseconds() / 1000;
+        now.getUTCHours() * 3600 +
+        now.getUTCMinutes() * 60 +
+        now.getUTCSeconds() +
+        now.getUTCMilliseconds() / 1000;
 
     const decimalDayFraction = secondsSinceMidnight / 86400;
-
     const totalDecimalSeconds = decimalDayFraction * 100000;
 
     const decHour = Math.floor(totalDecimalSeconds / 10000);
@@ -62,9 +82,15 @@ function updateClocks() {
         `${dh}:${dm}:${ds}`;
 }
 
-setInterval(updateClocks, 50);
-updateClocks();
-</script>
+// ===== Инициализация =====
+fetchUTCTime().then(() => {
+    updateClocks();
+    setInterval(updateClocks, 50);
 
+    // обновлять точное UTC раз в 5 минут, чтобы синхронизировать
+    setInterval(fetchUTCTime, 5 * 60 * 1000);
+});
+</script>
 </body>
+
 </html>
