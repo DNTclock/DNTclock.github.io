@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>Обычные и десятичные часы</title>
+<style>
+body {
+    background: #111;
+    color: #eee;
+    font-family: Consolas, monospace;
+    text-align: center;
+    margin-top: 60px;
+}
+.clock {
+    font-size: 48px;
+    margin: 20px;
+}
+.label {
+    font-size: 18px;
+    color: #aaa;
+}
+</style>
+</head>
+<body>
+
+<div class="label">Обычное время (24 часа)</div>
+<div id="normalClock" class="clock"></div>
+
+<div class="label">Десятичное время (10ч × 100 × 100)</div>
+<div id="decimalClock" class="clock"></div>
+
+<script>
+function updateClocks() {
+    const now = new Date();
+
+    // ===== Обычное время =====
+    const h = String(now.getHours()).padStart(2, '0');
+    const m = String(now.getMinutes()).padStart(2, '0');
+    const s = String(now.getSeconds()).padStart(2, '0');
+    document.getElementById("normalClock").textContent = `${h}:${m}:${s}`;
+
+    // ===== Десятичное время =====
+    const secondsSinceMidnight =
+        now.getHours() * 3600 +
+        now.getMinutes() * 60 +
+        now.getSeconds() +
+        now.getMilliseconds() / 1000;
+
+    const decimalDayFraction = secondsSinceMidnight / 86400;
+
+    const totalDecimalSeconds = decimalDayFraction * 100000;
+
+    const decHour = Math.floor(totalDecimalSeconds / 10000);
+    const decMinute = Math.floor((totalDecimalSeconds % 10000) / 100);
+    const decSecond = Math.floor(totalDecimalSeconds % 100);
+
+    const dh = String(decHour).padStart(2, '0');
+    const dm = String(decMinute).padStart(2, '0');
+    const ds = String(decSecond).padStart(2, '0');
+
+    document.getElementById("decimalClock").textContent =
+        `${dh}:${dm}:${ds}`;
+}
+
+setInterval(updateClocks, 50);
+updateClocks();
+</script>
+
+</body>
+</html>
