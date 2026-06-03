@@ -2,32 +2,39 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<title>Обычные и десятичные часы</title>
+<title>Обычные, десятичные часы и таймер</title>
 <style>
 body {
     background: #111;
     color: #eee;
     font-family: Consolas, monospace;
     text-align: center;
-    margin-top: 60px;
+    margin-top: 50px;
 }
-.clock {
+.clock, .timer {
     font-size: 48px;
     margin: 20px;
+}
+.timer {
+    color: #ff5555; /* Красный цвет для таймера */
 }
 .label {
     font-size: 18px;
     color: #aaa;
+    margin-top: 25px;
 }
 </style>
 </head>
 <body>
 
-<div class="label">Обычное время WINAPI (24 часаааааа)</div>
+<div class="label">Обычное время WINAPI (24 часа)</div>
 <div id="normalClock" class="clock"></div>
 
 <div class="label">Десятичное время (10ч × 100 × 100)</div>
 <div id="decimalClock" class="clock"></div>
+
+<div class="label">Осталось времени до 17:15:00</div>
+<div id="countdownTimer" class="timer">--:--:--</div>
 
 <script>
 let baseTime = null; // точное серверное время
@@ -47,7 +54,7 @@ async function fetchUTCTime() {
     }
 }
 
-// ===== Обновление часов =====
+// ===== Обновление часов и таймера =====
 function updateClocks() {
     if (!baseTime) return; // ждём первый fetch
 
@@ -79,8 +86,28 @@ function updateClocks() {
     const dm = String(decMinute).padStart(2, '0');
     const ds = String(decSecond).padStart(2, '0');
 
-    document.getElementById("decimalClock").textContent =
-        `${dh}:${dm}:${ds}`;
+    document.getElementById("decimalClock").textContent = `${dh}:${dm}:${ds}`;
+
+    // ===== Таймер обратного отсчета до 17:15 =====
+    const targetTime = new Date(now.getTime());
+    targetTime.setHours(17, 15, 0, 0); // Устанавливаем цель на 17:15:00 сегодня
+
+    // Если 17:15 сегодня уже прошло, переносим цель на завтра
+    if (now > targetTime) {
+        targetTime.setDate(targetTime.getDate() + 1);
+    }
+
+    const diffMs = targetTime - now; // разница в миллисекундах [1]
+
+    const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+    const diffMinutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+    const diffSeconds = Math.floor((diffMs % (1000 * 60)) / 1000);
+
+    const th = String(diffHours).padStart(2, '0');
+    const tm = String(diffMinutes).padStart(2, '0');
+    const ts = String(diffSeconds).padStart(2, '0');
+
+    document.getElementById("countdownTimer").textContent = `${th}:${tm}:${ts}`;
 }
 
 // ===== Инициализация =====
