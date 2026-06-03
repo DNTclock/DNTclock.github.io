@@ -30,18 +30,19 @@ body {
 <div id="decimalClock" class="clock"></div>
 
 <script>
-let baseTime = null; // точное UTC
+let baseTime = null; // точное серверное время
 let lastFetch = null; // момент последнего обновления
 
 async function fetchUTCTime() {
     try {
-        const res = await fetch('https://worldtimeapi.org/api/timezone/Etc/UTC');
+        // Запрашиваем локальное время пользователя на основе его IP
+        const res = await fetch('https://worldtimeapi.org');
         const data = await res.json();
-        baseTime = new Date(data.utc_datetime);
+        baseTime = new Date(data.datetime);
         lastFetch = Date.now();
     } catch (err) {
         console.error("Ошибка при получении времени:", err);
-        baseTime = new Date(); // fallback
+        baseTime = new Date(); // fallback на системное время устройства
         lastFetch = Date.now();
     }
 }
@@ -54,18 +55,18 @@ function updateClocks() {
     const delta = Date.now() - lastFetch;
     const now = new Date(baseTime.getTime() + delta);
 
-    // ===== Обычное время =====
-    const h = String(now.getUTCHours()).padStart(2, '0');
-    const m = String(now.getUTCMinutes()).padStart(2, '0');
-    const s = String(now.getUTCSeconds()).padStart(2, '0');
+    // ===== Обычное локальное время =====
+    const h = String(now.getHours()).padStart(2, '0');
+    const m = String(now.getMinutes()).padStart(2, '0');
+    const s = String(now.getSeconds()).padStart(2, '0');
     document.getElementById("normalClock").textContent = `${h}:${m}:${s}`;
 
-    // ===== Десятичное время =====
+    // ===== Десятичное локальное время =====
     const secondsSinceMidnight =
-        now.getUTCHours() * 3600 +
-        now.getUTCMinutes() * 60 +
-        now.getUTCSeconds() +
-        now.getUTCMilliseconds() / 1000;
+        now.getHours() * 3600 +
+        now.getMinutes() * 60 +
+        now.getSeconds() +
+        now.getMilliseconds() / 1000;
 
     const decimalDayFraction = secondsSinceMidnight / 86400;
     const totalDecimalSeconds = decimalDayFraction * 100000;
@@ -87,10 +88,9 @@ fetchUTCTime().then(() => {
     updateClocks();
     setInterval(updateClocks, 50);
 
-    // обновлять точное UTC раз в 5 минут, чтобы синхронизировать
+    // обновлять точное время раз в 5 минут для синхронизации
     setInterval(fetchUTCTime, 5 * 60 * 1000);
 });
 </script>
 </body>
-
 </html>
