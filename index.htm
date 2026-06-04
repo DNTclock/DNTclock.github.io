@@ -16,7 +16,7 @@ body {
     margin: 20px;
 }
 .timer {
-    color: #ff5555; /* Красный цвет для таймера */
+    color: #ff5555; 
 }
 .label {
     font-size: 18px;
@@ -27,48 +27,46 @@ body {
 </head>
 <body>
 
-<div class="label">Обычное время WINAPI (24 часа)</div>
-<div id="normalClock" class="clock"></div>
+<div class="label">Обычное время (24 часа)</div>
+<div id="normalClock" class="clock">--:--:--</div>
 
 <div class="label">Десятичное время (10ч × 100 × 100)</div>
-<div id="decimalClock" class="clock"></div>
+<div id="decimalClock" class="clock">--:--:--</div>
 
 <div class="label">Осталось времени до 17:15:00</div>
 <div id="countdownTimer" class="timer">--:--:--</div>
 
 <script>
-let baseTime = null; // точное серверное время
-let lastFetch = null; // момент последнего обновления
+let baseTime = null; 
+let lastFetch = null; 
 
 async function fetchUTCTime() {
     try {
-        // Запрашиваем локальное время пользователя на основе его IP
-        const res = await fetch('https://worldtimeapi.org');
+        // Исправлен URL для получения локального времени по IP
+        const res = await fetch('https://worldtimeapi.org/api/ip');
         const data = await res.json();
         baseTime = new Date(data.datetime);
         lastFetch = Date.now();
     } catch (err) {
-        console.error("Ошибка при получении времени:", err);
-        baseTime = new Date(); // fallback на системное время устройства
+        console.error("Ошибка при получении времени, используем системное:", err);
+        baseTime = new Date(); 
         lastFetch = Date.now();
     }
 }
 
-// ===== Обновление часов и таймера =====
 function updateClocks() {
-    if (!baseTime) return; // ждём первый fetch
+    if (!baseTime) return; 
 
-    // сколько прошло миллисекунд с момента fetch
     const delta = Date.now() - lastFetch;
     const now = new Date(baseTime.getTime() + delta);
 
-    // ===== Обычное локальное время =====
+    // ===== Обычное время =====
     const h = String(now.getHours()).padStart(2, '0');
     const m = String(now.getMinutes()).padStart(2, '0');
     const s = String(now.getSeconds()).padStart(2, '0');
     document.getElementById("normalClock").textContent = `${h}:${m}:${s}`;
 
-    // ===== Десятичное локальное время =====
+    // ===== Десятичное время =====
     const secondsSinceMidnight =
         now.getHours() * 3600 +
         now.getMinutes() * 60 +
@@ -89,15 +87,20 @@ function updateClocks() {
     document.getElementById("decimalClock").textContent = `${dh}:${dm}:${ds}`;
 
     // ===== Таймер обратного отсчета до 17:15 =====
-    const targetTime = new Date(now.getTime());
-    targetTime.setHours(17, 15, 0, 0); // Устанавливаем цель на 17:15:00 сегодня
+    // Создаем целевое время строго на основе года, месяца и дня полученного объекта 'now'
+    const targetTime = new Date(
+        now.getFullYear(),
+        now.getMonth(),
+        now.getDate(),
+        17, 15, 0, 0
+    );
 
-    // Если 17:15 сегодня уже прошло, переносим цель на завтра
+    // Если 17:15 сегодня уже прошло, переносим на завтра
     if (now > targetTime) {
         targetTime.setDate(targetTime.getDate() + 1);
     }
 
-    const diffMs = targetTime - now; // разница в миллисекундах [1]
+    const diffMs = targetTime - now; 
 
     const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
     const diffMinutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
@@ -114,8 +117,7 @@ function updateClocks() {
 fetchUTCTime().then(() => {
     updateClocks();
     setInterval(updateClocks, 50);
-
-    // обновлять точное время раз в 5 минут для синхронизации
+    // Периодическая синхронизация раз в 5 минут
     setInterval(fetchUTCTime, 5 * 60 * 1000);
 });
 </script>
