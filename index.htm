@@ -61,7 +61,6 @@ body {
     text-align: right;
 }
 
-/* Объединили общие стили подписей */
 .timezone-sub, .timer-sub {
     font-size: 11px;
     color: #666;
@@ -73,7 +72,6 @@ body {
     letter-spacing: 0.5px;
 }
 
-/* Объединили общие стили цифр часов и таймера */
 .clock-digits, .timer-digits {
     font-size: 32px;
     font-weight: bold;
@@ -179,7 +177,7 @@ body {
 <div class="tester-container">
     <div style="font-size: 12px; color: #888; margin-bottom: 5px;">Проба цвета на ходу:</div>
     <span id="liveBox" class="live-box"></span>
-    <input type="text" id="colorInput" class="color-input" placeholder="#00ffff" oninput="dom.liveBox.style.backgroundColor = this.value">
+    <input type="text" id="colorInput" class="color-input" placeholder="#00ffff">
 </div>
 
 <marquee class="space-marquee" scrollamount="4" id="spaceMarquee">
@@ -187,12 +185,21 @@ body {
 </marquee>
 
 <script>
-// Глобальное состояние
+// КОНСТАНТЫ И НАСТРОЙКИ (Астрономические и календарные данные)
+const MS_IN_DAY = 86400000;
+const LUNAR_CYCLE_MS = 2551443180;      // Средняя продолжительность синодического месяца Луны
+const SUN_ROTATION_MS = 2192832000;     // Кэррингтоновский оборот Солнца в мс
+const VENUS_YEAR_EARTH_DAYS = 224.7;
+const VENUS_SOL_EARTH_DAYS = 116.75;
+const MARS_YEAR_EARTH_DAYS = 686.98;
+const MARS_SOL_EARTH_DAYS = 1.025957;
+
+// Глобальное состояние временной синхронизации
 let baseTime = null;
 let lastFetch = null;
 let userTimezone = "UTC";
 
-// Кэш DOM-элементов для защиты от утечек памяти и лишней нагрузки
+// Кэш DOM-элементов для уменьшения количества поисков по документу
 const dom = {
     weather: document.getElementById("weatherBlock"),
     timezone: document.getElementById("timezoneLabel"),
@@ -200,7 +207,8 @@ const dom = {
     timerLabel: document.getElementById("timerLabel"),
     timer: document.getElementById("countdownTimer"),
     spaceLenta: document.getElementById("spaceLenta"),
-    liveBox: document.getElementById("liveBox")
+    liveBox: document.getElementById("liveBox"),
+    colorInput: document.getElementById("colorInput")
 };
 
 async function fetchUTCTime() {
@@ -246,15 +254,19 @@ async function fetchRealWeather() {
     }
 }
 
+// Проверка на выходной день
+function isWeekend(day) {
+    return day === 0 || day === 6;
+}
+
 function updateClocks() {
     if (!baseTime) return;
 
-    // Вычисляем дельту один раз
     const now = new Date(baseTime.getTime() + (Date.now() - lastFetch));
 
     dom.timezone.textContent = `Время [ ${userTimezone} ]`;
 
-    // Быстрое форматирование времени без создания лишних подстрок
+    // Форматирование земных часов
     const h = String(now.getHours()).padStart(2, '0');
     const m = String(now.getMinutes()).padStart(2, '0');
     const s = String(now.getSeconds()).padStart(2, '0');
@@ -271,7 +283,7 @@ function updateClocks() {
 
     let labelText = "";
     let targetTime = null;
-    const isWorkingDay = (currentDay >= 1 && currentDay <= 5);
+    const isWorkingDay = !isWeekend(currentDay);
     let dynamicColor = "#ff5555"; 
 
     if (isWorkingDay && now >= startOfWorkToday && now < endOfWorkToday) {
@@ -280,7 +292,7 @@ function updateClocks() {
 
         const progress = (now - startOfWorkToday) / (endOfWorkToday - startOfWorkToday);
 
-        // Плавный цветовой переход
+        // Вычисление градиента
         const r = Math.floor(255 - (255 * progress));
         const g = Math.floor(85 + (170 * progress));
         const b = Math.floor(85 + (42 * progress));
@@ -292,7 +304,7 @@ function updateClocks() {
         if (isWorkingDay && now < startOfWorkToday) {
             nextTarget = startOfWorkToday;
         } else {
-            while (nextTarget.getDay() === 0 || nextTarget.getDay() === 6) {
+            while (isWeekend(nextTarget.getDay())) {
                 nextTarget.setDate(nextTarget.getDate() + 1);
             }
         }
@@ -313,14 +325,14 @@ function updateClocks() {
 
     // ===== Космические метрики =====
     const currentMs = now.getTime();
-    const totalEarthDays = (currentMs - Date.UTC(1, 0, 1, 0, 0, 0, 0)) / 86400000;
+    const totalEarthDays = (currentMs - Date.UTC(1, 0, 1, 0, 0, 0, 0)) / MS_IN_DAY;
 
-    const venusYearsTotal = totalEarthDays / 224.7;
-    const venusDaysTotal = totalEarthDays / 116.75;
-    const marsYearsTotal = totalEarthDays / 686.98;
-    const marsSolsTotal = totalEarthDays / 1.025957;
+    const venusYearsTotal = totalEarthDays / VENUS_YEAR_EARTH_DAYS;
+    const venusDaysTotal = totalEarthDays / VENUS_SOL_EARTH_DAYS;
+    const marsYearsTotal = totalEarthDays / MARS_YEAR_EARTH_DAYS;
+    const marsSolsTotal = totalEarthDays / MARS_SOL_EARTH_DAYS;
 
-    const moonCycles = (currentMs - Date.UTC(2000, 0, 6, 18, 14, 0)) / 2551443180;
+    const moonCycles = (currentMs - Date.UTC(2000, 0, 6, 18, 14, 0)) / LUNAR_CYCLE_MS;
     const moonAgeDays = (moonCycles % 1) * 29.53059;
     
     let moonPhaseText = "";
@@ -335,7 +347,7 @@ function updateClocks() {
     if (moonAgeDays < 0.5 || moonAgeDays > 29.0) { moonPhaseText = "Новолуние"; moonIllumination = "0"; }
     else if (Math.abs(moonAgeDays - 14.76) < 0.5) { moonPhaseText = "Полнолуние"; moonIllumination = "100"; }
 
-    const sunRotationsTotal = (currentMs - Date.UTC(1853, 10, 9, 12, 0, 0)) / 2192832000;
+    const sunRotationsTotal = (currentMs - Date.UTC(1853, 10, 9, 12, 0, 0)) / SUN_ROTATION_MS;
 
     dom.spaceLenta.innerHTML = `🌙 ЛУНА: ${moonPhaseText} (${moonIllumination}%) &nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp; 
                        🌋 ВЕНЕРА: ${Math.floor(venusDaysTotal) + 1}-ие сутки ${Math.floor(venusYearsTotal) + 1}-го года (день завершен на ${((venusDaysTotal % 1) * 100).toFixed(2)}%) &nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp; 
@@ -344,13 +356,21 @@ function updateClocks() {
 }
 
 async function init() {
-    await fetchUTCTime();
-    await fetchRealWeather();
+    // Параллельный запуск критически важных сетевых запросов
+    await Promise.all([
+        fetchUTCTime(),
+        fetchRealWeather()
+    ]);
     
+    // Привязка логики тестера цвета в обход инлайн-скриптов
+    dom.colorInput.addEventListener("input", (e) => {
+        dom.liveBox.style.backgroundColor = e.target.value;
+    });
+
     updateClocks();
-    setInterval(updateClocks, 50); 
-    setInterval(fetchUTCTime, 300000); // 5 минут
-    setInterval(fetchRealWeather, 1800000); // 30 минут
+    setInterval(updateClocks, 1000);        // Оптимальный интервал раз в секунду
+    setInterval(fetchUTCTime, 300000);       // Синхронизация времени каждые 5 минут
+    setInterval(fetchRealWeather, 1800000);   // Обновление сводки погоды каждые 30 минут
 }
 
 init();
