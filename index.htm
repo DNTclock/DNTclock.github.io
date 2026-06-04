@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <title>Космический пульт управления</title>
 <style>
+/* БАЗОВЫЕ НАСТРОЙКИ ЭКРАНА */
 body {
     background: #111;
     color: #eee;
@@ -56,38 +57,33 @@ body {
     gap: 25px;
 }
 
-.time-block {
+.time-block, .timer-block {
     text-align: right;
+}
+
+/* Объединили общие стили подписей */
+.timezone-sub, .timer-sub {
+    font-size: 11px;
+    color: #666;
+    display: block;
+    margin-bottom: 2px;
 }
 
 .timezone-sub {
-    font-size: 11px;
-    color: #666;
-    display: block;
-    margin-bottom: 2px;
     letter-spacing: 0.5px;
 }
 
-.clock-digits {
+/* Объединили общие стили цифр часов и таймера */
+.clock-digits, .timer-digits {
     font-size: 32px;
     font-weight: bold;
+}
+
+.clock-digits {
     color: #fff;
 }
 
-.timer-block {
-    text-align: right;
-}
-
-.timer-sub {
-    font-size: 11px;
-    color: #666;
-    display: block;
-    margin-bottom: 2px;
-}
-
 .timer-digits {
-    font-size: 32px;
-    font-weight: bold;
     transition: color 0.5s ease;
 }
 
@@ -183,7 +179,7 @@ body {
 <div class="tester-container">
     <div style="font-size: 12px; color: #888; margin-bottom: 5px;">Проба цвета на ходу:</div>
     <span id="liveBox" class="live-box"></span>
-    <input type="text" id="colorInput" class="color-input" placeholder="#00ffff" oninput="document.getElementById('liveBox').style.backgroundColor = this.value">
+    <input type="text" id="colorInput" class="color-input" placeholder="#00ffff" oninput="dom.liveBox.style.backgroundColor = this.value">
 </div>
 
 <marquee class="space-marquee" scrollamount="4" id="spaceMarquee">
@@ -191,9 +187,21 @@ body {
 </marquee>
 
 <script>
+// Глобальное состояние
 let baseTime = null;
 let lastFetch = null;
 let userTimezone = "UTC";
+
+// Кэш DOM-элементов для защиты от утечек памяти и лишней нагрузки
+const dom = {
+    weather: document.getElementById("weatherBlock"),
+    timezone: document.getElementById("timezoneLabel"),
+    clock: document.getElementById("normalClock"),
+    timerLabel: document.getElementById("timerLabel"),
+    timer: document.getElementById("countdownTimer"),
+    spaceLenta: document.getElementById("spaceLenta"),
+    liveBox: document.getElementById("liveBox")
+};
 
 async function fetchUTCTime() {
     try {
@@ -215,14 +223,14 @@ async function fetchRealWeather() {
         const res = await fetch('https://wttr.in/?format=j1');
         const data = await res.json();
         
+        const current = data.current_condition[0];
         const city = data.nearest_area[0].areaName[0].value;
-        const temp = data.current_condition[0].temp_C;
-        const desc = data.current_condition[0].lang_ru ? data.current_condition[0].lang_ru[0].value : data.current_condition[0].weatherDesc[0].value;
-        const humidity = data.current_condition[0].humidity;
-        const wind = data.current_condition[0].windspeedKmph;
-        const windMs = (parseFloat(wind) / 3.6).toFixed(1);
+        const temp = current.temp_C;
+        const desc = current.lang_ru ? current.lang_ru[0].value : current.weatherDesc[0].value;
+        const humidity = current.humidity;
+        const windMs = (parseFloat(current.windspeedKmph) / 3.6).toFixed(1);
 
-        document.getElementById("weatherBlock").innerHTML = `
+        dom.weather.innerHTML = `
             <div class="weather-title">📍 ПОГОДА (${city})</div>
             <div>• Температура: <b>${temp}°C</b></div>
             <div>• Состояние: <span>${desc}</span></div>
@@ -231,7 +239,7 @@ async function fetchRealWeather() {
         `;
     } catch (err) {
         console.error("Не удалось получить погоду:", err);
-        document.getElementById("weatherBlock").innerHTML = `
+        dom.weather.innerHTML = `
             <div class="weather-title">📍 МЕТЕОСТАНЦИЯ</div>
             <div style="color: #ff5555;">Автономный режим (ошибка сети)</div>
         `;
@@ -241,48 +249,46 @@ async function fetchRealWeather() {
 function updateClocks() {
     if (!baseTime) return;
 
-    const delta = Date.now() - lastFetch;
-    const now = new Date(baseTime.getTime() + delta);
+    // Вычисляем дельту один раз
+    const now = new Date(baseTime.getTime() + (Date.now() - lastFetch));
 
-    document.getElementById("timezoneLabel").textContent = `Время [ ${userTimezone} ]`;
+    dom.timezone.textContent = `Время [ ${userTimezone} ]`;
 
+    // Быстрое форматирование времени без создания лишних подстрок
     const h = String(now.getHours()).padStart(2, '0');
     const m = String(now.getMinutes()).padStart(2, '0');
     const s = String(now.getSeconds()).padStart(2, '0');
-    document.getElementById("normalClock").textContent = `${h}:${m}:${s}`;
+    dom.clock.textContent = `${h}:${m}:${s}`;
 
     // ===== Расчет таймера рабочего графика =====
     const currentDay = now.getDay();
-    const startOfWorkToday = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 8, 0, 0, 0);
-    let endOfWorkToday = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 17, 15, 0, 0);
-    
-    if (currentDay === 5) {
-        endOfWorkToday.setHours(16, 0, 0, 0);
-    }
+    const year = now.getFullYear();
+    const month = now.getMonth();
+    const date = now.getDate();
+
+    const startOfWorkToday = new Date(year, month, date, 8, 0, 0, 0);
+    const endOfWorkToday = new Date(year, month, date, currentDay === 5 ? 16 : 17, currentDay === 5 ? 0 : 15, 0, 0);
 
     let labelText = "";
     let targetTime = null;
     const isWorkingDay = (currentDay >= 1 && currentDay <= 5);
-    const timerElement = document.getElementById("countdownTimer");
-    
     let dynamicColor = "#ff5555"; 
 
     if (isWorkingDay && now >= startOfWorkToday && now < endOfWorkToday) {
         labelText = "До конца смены:";
         targetTime = endOfWorkToday;
 
-        const totalWorkMs = endOfWorkToday - startOfWorkToday;
-        const passedWorkMs = now - startOfWorkToday;
-        const progress = passedWorkMs / totalWorkMs;
+        const progress = (now - startOfWorkToday) / (endOfWorkToday - startOfWorkToday);
 
+        // Плавный цветовой переход
         const r = Math.floor(255 - (255 * progress));
-        const g = Math.floor(85 + ((255 - 85) * progress));
-        const b = Math.floor(85 + ((127 - 85) * progress));
+        const g = Math.floor(85 + (170 * progress));
+        const b = Math.floor(85 + (42 * progress));
         dynamicColor = `rgb(${r}, ${g}, ${b})`;
     } else {
         labelText = "До начала смены:";
         
-        let nextTarget = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 8, 0, 0, 0);
+        let nextTarget = new Date(year, month, date + 1, 8, 0, 0, 0);
         if (isWorkingDay && now < startOfWorkToday) {
             nextTarget = startOfWorkToday;
         } else {
@@ -293,35 +299,28 @@ function updateClocks() {
         targetTime = nextTarget;
     }
 
-    timerElement.style.color = dynamicColor;
+    if (dom.timer.style.color !== dynamicColor) {
+        dom.timer.style.color = dynamicColor;
+    }
 
     const diffMs = targetTime - now;
-    const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
-    const diffMinutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
-    const diffSeconds = Math.floor((diffMs % (1000 * 60)) / 1000);
+    const diffHours = Math.floor(diffMs / 3600000);
+    const diffMinutes = Math.floor((diffMs % 3600000) / 60000);
+    const diffSeconds = Math.floor((diffMs % 60000) / 1000);
 
-    document.getElementById("timerLabel").textContent = labelText;
-    timerElement.textContent = `${String(diffHours).padStart(2, '0')}:${String(diffMinutes).padStart(2, '0')}:${String(diffSeconds).padStart(2, '0')}`;
+    dom.timerLabel.textContent = labelText;
+    dom.timer.textContent = `${String(diffHours).padStart(2, '0')}:${String(diffMinutes).padStart(2, '0')}:${String(diffSeconds).padStart(2, '0')}`;
 
     // ===== Космические метрики =====
     const currentMs = now.getTime();
-    const eraStartMs = Date.UTC(1, 0, 1, 0, 0, 0, 0);
-    const totalEarthDays = (currentMs - eraStartMs) / (1000 * 60 * 60 * 24);
+    const totalEarthDays = (currentMs - Date.UTC(1, 0, 1, 0, 0, 0, 0)) / 86400000;
 
     const venusYearsTotal = totalEarthDays / 224.7;
-    const venusYearCurrent = Math.floor(venusYearsTotal) + 1;
     const venusDaysTotal = totalEarthDays / 116.75;
-    const venusDayCurrent = Math.floor(venusDaysTotal) + 1;
-    const venusDayProgress = ((venusDaysTotal % 1) * 100).toFixed(2);
-
     const marsYearsTotal = totalEarthDays / 686.98;
-    const marsYearCurrent = Math.floor(marsYearsTotal) + 1;
     const marsSolsTotal = totalEarthDays / 1.025957;
-    const marsSolCurrent = Math.floor(marsSolsTotal) + 1;
-    const marsSolProgress = ((marsSolsTotal % 1) * 100).toFixed(2);
 
-    const knownNewMoonMs = Date.UTC(2000, 0, 6, 18, 14, 0);
-    const moonCycles = (currentMs - knownNewMoonMs) / (1000 * 60 * 60 * 24 * 29.53059);
+    const moonCycles = (currentMs - Date.UTC(2000, 0, 6, 18, 14, 0)) / 2551443180;
     const moonAgeDays = (moonCycles % 1) * 29.53059;
     
     let moonPhaseText = "";
@@ -336,15 +335,12 @@ function updateClocks() {
     if (moonAgeDays < 0.5 || moonAgeDays > 29.0) { moonPhaseText = "Новолуние"; moonIllumination = "0"; }
     else if (Math.abs(moonAgeDays - 14.76) < 0.5) { moonPhaseText = "Полнолуние"; moonIllumination = "100"; }
 
-    const carringtonStartMs = Date.UTC(1853, 10, 9, 12, 0, 0);
-    const sunRotationsTotal = (currentMs - carringtonStartMs) / (1000 * 60 * 60 * 24 * 25.38);
-    const sunRotationCurrent = Math.floor(sunRotationsTotal) + 1;
-    const sunRotationProgress = ((sunRotationsTotal % 1) * 100).toFixed(2);
+    const sunRotationsTotal = (currentMs - Date.UTC(1853, 10, 9, 12, 0, 0)) / 2192832000;
 
-    document.getElementById("spaceLenta").innerHTML = `🌙 ЛУНА: ${moonPhaseText} (${moonIllumination}%) &nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp; 
-                       🌋 ВЕНЕРА: ${venusDayCurrent}-ие сутки ${venusYearCurrent}-го года (день завершен на ${venusDayProgress}%) &nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp; 
-                       🚀 МАРС: ${marsSolCurrent}-ый Сол ${marsYearCurrent}-го года (завершен на ${marsSolProgress}%) &nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp; 
-                       ☀️ СОЛНЦЕ: идет ${sunRotationCurrent}-ый оборот (цикл выполнен на ${sunRotationProgress}%)`;
+    dom.spaceLenta.innerHTML = `🌙 ЛУНА: ${moonPhaseText} (${moonIllumination}%) &nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp; 
+                       🌋 ВЕНЕРА: ${Math.floor(venusDaysTotal) + 1}-ие сутки ${Math.floor(venusYearsTotal) + 1}-го года (день завершен на ${((venusDaysTotal % 1) * 100).toFixed(2)}%) &nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp; 
+                       🚀 МАРС: ${Math.floor(marsSolsTotal) + 1}-ый Сол ${Math.floor(marsYearsTotal) + 1}-го года (завершен на ${((marsSolsTotal % 1) * 100).toFixed(2)}%) &nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp; 
+                       ☀️ СОЛНЦЕ: идет ${Math.floor(sunRotationsTotal) + 1}-ый оборот (цикл выполнен на ${((sunRotationsTotal % 1) * 100).toFixed(2)}%)`;
 }
 
 async function init() {
@@ -353,8 +349,8 @@ async function init() {
     
     updateClocks();
     setInterval(updateClocks, 50); 
-    setInterval(fetchUTCTime, 5 * 60 * 1000); 
-    setInterval(fetchRealWeather, 30 * 60 * 1000); 
+    setInterval(fetchUTCTime, 300000); // 5 минут
+    setInterval(fetchRealWeather, 1800000); // 30 минут
 }
 
 init();
