@@ -30,10 +30,10 @@ body {
 <div class="label">Обычное время (24 часа)</div>
 <div id="normalClock" class="clock">--:--:--</div>
 
-<div class="label">Десятичное время (10 ч × 100 × 100)</div>
+<div class="label">Десятичное время (10ч × 100 × 100)</div>
 <div id="decimalClock" class="clock">--:--:--</div>
 
-<div class="label">Осталось времени до 17:15:00</div>
+<div id="timerLabel" class="label">Загрузка таймера...</div>
 <div id="countdownTimer" class="timer">--:--:--</div>
 
 <script>
@@ -42,7 +42,6 @@ let lastFetch = null;
 
 async function fetchUTCTime() {
     try {
-        // Исправлен URL для получения локального времени по IP
         const res = await fetch('https://worldtimeapi.org/api/ip');
         const data = await res.json();
         baseTime = new Date(data.datetime);
@@ -86,20 +85,50 @@ function updateClocks() {
 
     document.getElementById("decimalClock").textContent = `${dh}:${dm}:${ds}`;
 
-    // ===== Таймер обратного отсчета до 17:15 =====
-    // Создаем целевое время строго на основе года, месяца и дня полученного объекта 'now'
-    const targetTime = new Date(
-        now.getFullYear(),
-        now.getMonth(),
-        now.getDate(),
-        17, 15, 0, 0
-    );
-
-    // Если 17:15 сегодня уже прошло, переносим на завтра
-    if (now > targetTime) {
-        targetTime.setDate(targetTime.getDate() + 1);
+    // ===== Умный таймер рабочего графика =====
+    const currentDay = now.getDay(); // 0 = Воскресенье, 1 = Понедельник, ..., 5 = Пятница, 6 = Суббота
+    const currentDayTimeMs = now.getTime();
+    
+    // Создаем точки отсчета для СЕГОДНЯ
+    const startOfWorkToday = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 8, 0, 0, 0);
+    
+    // Определяем время окончания работы сегодня в зависимости от дня недели
+    let endOfWorkToday = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 17, 15, 0, 0);
+    if (currentDay === 5) { // Если сегодня пятница
+        endOfWorkToday.setHours(16, 0, 0, 0);
     }
 
+    let labelText = "";
+    let targetTime = null;
+
+    // Проверяем: это будний день (Пн-Пт)?
+    const isWorkingDay = (currentDay >= 1 && currentDay <= 5);
+
+    if (isWorkingDay && now >= startOfWorkToday && now < endOfWorkToday) {
+        // Мы СЕЙЧАС внутри рабочего дня
+        labelText = "До конца рабочего дня:";
+        targetTime = endOfWorkToday;
+    } else {
+        // Рабочий день либо еще не начался, либо уже закончился, либо сегодня выходной
+        labelText = "До начала рабочего дня:";
+        
+        // Будем искать ближайший рабочий день (утро 8:00)
+        // Начнем проверять с завтрашнего дня (+1 день от сегодня)
+        let nextTarget = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 8, 0, 0, 0);
+        
+        // Если сегодня рабочий день, но время ДО 8:00 утра — значит целевое время это СЕГОДНЯ 8:00 утра!
+        if (isWorkingDay && now < startOfWorkToday) {
+            nextTarget = startOfWorkToday;
+        } else {
+            // Крутим цикл вперед по дням, пока не упремся в Понедельник-Пятницу
+            while (nextTarget.getDay() === 0 || nextTarget.getDay() === 6) {
+                nextTarget.setDate(nextTarget.getDate() + 1);
+            }
+        }
+        targetTime = nextTarget;
+    }
+
+    // Расчет разницы во времени
     const diffMs = targetTime - now; 
 
     const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
@@ -110,6 +139,8 @@ function updateClocks() {
     const tm = String(diffMinutes).padStart(2, '0');
     const ts = String(diffSeconds).padStart(2, '0');
 
+    // Выводим текст подписи и сам счетчик на экран
+    document.getElementById("timerLabel").textContent = labelText;
     document.getElementById("countdownTimer").textContent = `${th}:${tm}:${ts}`;
 }
 
@@ -117,7 +148,6 @@ function updateClocks() {
 fetchUTCTime().then(() => {
     updateClocks();
     setInterval(updateClocks, 50);
-    // Периодическая синхронизация раз в 5 минут
     setInterval(fetchUTCTime, 5 * 60 * 1000);
 });
 </script>
