@@ -2,147 +2,86 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<title>Космический пульт времени</title>
+<title>Космический пулет времени</title>
 <style>
-/* Начинает описание правил оформления для всего тела (фона и текста) страницы */
+/* Настройки фона страницы и шрифта */
 body {
-    /* Окрашивает задний фон страницы в глубокий темно-серый цвет */
     background: #111;
-    /* Делает цвет основного текста почти белым для контраста */
     color: #eee;
-    /* Устанавливает моноширинный шрифт, где все цифры и буквы одинаковой ширины */
     font-family: Consolas, monospace;
-    /* Выравнивает все текстовые блоки и элементы строго по центру экрана */
     text-align: center;
-    /* Делает отступ в 100 пикселей сверху, чтобы освободить место под таймер */
     margin-top: 100px;
-/* Закрывает блок стилей для элемента body */
 }
-/* Начинает описание стилей для центрального блока обычных часов */
+/* Стиль для главных домашних часов */
 .clock {
-    /* Увеличивает размер цифр обычных часов до внушительных 64 пикселей */
     font-size: 64px;
-    /* Создает свободную зону в 20 пикселей вокруг блока */
     margin: 20px;
-/* Закрывает блок стилей для .clock */
 }
-/* Начинает описание стилей для класса .label (текстовые подписи) */
+/* Подписи под и над элементами */
 .label {
-    /* Делает размер шрифта подписей аккуратным и небольшим — 18 пикселей */
     font-size: 18px;
-    /* Красит текст подписей в неяркий серый цвет */
     color: #aaa;
-    /* Добавляет отступ сверху */
     margin-top: 25px;
-/* Закрывает блок стилей для класса .label */
 }
-/* Стили для контейнера таймера в ПРАВОМ ВЕРХНЕМ УГЛУ */
+/* Позиционирование таймера в верхнем правом углу */
 .timer-corner {
-    /* Фиксирует таймер на экране, чтобы он не двигался */
     position: fixed;
-    /* Прижимает блок к правому краю с отступом в 30 пикселей */
     right: 30px;
-    /* Прижимает блок к верхнему краю с отступом в 20 пикселей */
     top: 20px;
-    /* Выравнивает текст внутри этого контейнера по правому краю */
     text-align: right;
-    /* Задает полупрозрачный темный фон, чтобы текст не сливался */
     background: rgba(20, 20, 20, 0.8);
-    /* Добавляет внутренний отступ в 10 пикселей */
     padding: 10px;
-    /* Скругляет углы рамки таймера */
     border-radius: 6px;
-/* Закрывает стили для .timer-corner */
 }
-/* Стили для цифр таймера в углу */
+/* Цифры таймера */
 .timer-digits {
-    /* Делает цифры таймера крупными — 36 пикселей */
     font-size: 36px;
-    /* Делает шрифт жирным */
     font-weight: bold;
-/* Закрывает стили для .timer-digits */
 }
-/* Стили для бегущей строки в самом низу страницы */
+/* Бегущая строка в самом низу экрана */
 .space-marquee {
-    /* Фиксирует бегущую строку в самом низу экрана */
     position: fixed;
-    /* Прижимает к левому краю */
     left: 0;
-    /* Прижимает к нижнему краю */
     bottom: 0;
-    /* Растягивает строку на всю ширину экрана */
     width: 100%;
-    /* Красит фон бегущей строки в черный цвет */
     background: #000;
-    /* Задает высоту строки в 40 пикселей */
     height: 40px;
-    /* Выравнивает текст по вертикали, чтобы он шел ровно по центру полосы */
     line-height: 40px;
-    /* Делает текст золотисто-салатовым, в космическом стиле */
     color: #00ffaa;
-    /* Устанавливает размер шрифта поменьше — 14 пикселей */
     font-size: 14px;
-    /* Добавляет тонкую серую полоску над бегущей строкой */
     border-top: 1px solid #333;
-/* Закрывает стили для .space-marquee */
 }
-/* Стили для контейнера интерактивного тестера в нижнем правом углу (над бегущей строкой) */
+/* Интерактивный тестер цвета в углу */
 .tester-container {
-    /* Фиксирует элемент на экране */
     position: fixed;
-    /* Отступ справа */
     right: 20px;
-    /* Поднимаем чуть выше, чтобы не перекрывать бегущую строку */
     bottom: 50px;
-    /* Выравнивает содержимое по левому краю */
     text-align: left;
-    /* Задает полупрозрачный фон */
     background: rgba(30, 30, 30, 0.8);
-    /* Внутренние отступы */
     padding: 15px;
-    /* Скругляет углы */
     border-radius: 8px;
-    /* Добавляет рамку */
     border: 1px solid #444;
-/* Закрывает стили для .tester-container */
 }
-/* Стили для финального единственного квадрата-пробника в тестере */
+/* Пробный квадрат в тестере */
 .live-box {
-    /* Делает элемент блочно-строчным */
     display: inline-block;
-    /* Ширина 30 пикселей */
     width: 30px;
-    /* Высота 30 пикселей */
     height: 30px;
-    /* Стартовый фоновый цвет */
     background-color: #888;
-    /* Скругляет углы */
     border-radius: 4px;
-    /* Выравнивает по центру строки */
     vertical-align: middle;
-    /* Отступ справа */
     margin-right: 10px;
-/* Закрывает стили для .live-box */
 }
-/* Стили для текстового поля ввода кодов цветов */
+/* Поле ввода цвета */
 .color-input {
-    /* Ширина 120 пикселей */
     width: 120px;
-    /* Внутренние отступы */
     padding: 5px;
-    /* Фон инпута */
     background: #222;
-    /* Цвет текста */
     color: #fff;
-    /* Рамка */
     border: 1px solid #555;
-    /* Скругляет углы */
     border-radius: 4px;
-    /* Наследует шрифт страницы */
     font-family: inherit;
-    /* Выравнивает по центру строки */
     vertical-align: middle;
-/* Закрывает стили для .color-input */
 }
 </style>
 </head>
@@ -163,90 +102,106 @@ body {
 </div>
 
 <marquee class="space-marquee" scrollamount="4">
-    <span id="spaceLenta">Загрузка космических метрик...</span>
+    <span id="spaceLenta">Загрузка межпланетных календарей...</span>
 </marquee>
 
 <script>
-// Переменная для хранения точного серверного времени
 let baseTime = null;
-// Переменная для фиксации момента запроса к серверу
 let lastFetch = null;
-// Новая переменная: сюда мы сохраним название часового пояса, полученное от API
 let userTimezone = "локальном часовом поясе";
 
-// Асинхронная функция запроса времени и данных о сети
 async function fetchUTCTime() {
     try {
         const res = await fetch('https://worldtimeapi.org/api/ip');
         const data = await res.json();
         baseTime = new Date(data.datetime);
         lastFetch = Date.now();
-        // Сохраняем имя часового пояса (например: "Europe/Kaliningrad") из ответа сервера
         userTimezone = data.timezone;
     } catch (err) {
-        console.error("Ошибка при получении времени, используем системное:", err);
+        console.error("Ошибка сети, переходим на системную дату:", err);
         baseTime = new Date();
         lastFetch = Date.now();
-        // Если интернет упал, вычисляем часовой пояс встроенными силами браузера
         userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
     }
 }
 
-// Главная циклическая функция перерасчета времени и планетных суток
 function updateClocks() {
     if (!baseTime) return;
 
     const delta = Date.now() - lastFetch;
     const now = new Date(baseTime.getTime() + delta);
 
-    // Меняем текст подписи над часами, подставляя туда реальный часовой пояс ХХХ
+    // Обновляем часовой пояс в подписи
     document.getElementById("timezoneLabel").textContent = `Время в часовом поясе [ ${userTimezone} ]`;
 
-    // ===== Обычное время =====
+    // Вывод обычного земного времени
     const h = String(now.getHours()).padStart(2, '0');
     const m = String(now.getMinutes()).padStart(2, '0');
     const s = String(now.getSeconds()).padStart(2, '0');
     document.getElementById("normalClock").textContent = `${h}:${m}:${s}`;
 
-    // ===== Расчет секунд для Космической Ленты =====
-    const secondsSinceMidnight = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds() + now.getMilliseconds() / 1000;
-
-    // 1. ДЕСЯТИЧНОЕ ВРЕМЯ (Земля 10-часовая)
-    const decimalDayFraction = secondsSinceMidnight / 86400;
-    const totalDecimalSeconds = decimalDayFraction * 100000;
-    const decHour = String(Math.floor(totalDecimalSeconds / 10000)).padStart(2, '0');
-    const decMinute = String(Math.floor((totalDecimalSeconds % 10000) / 100)).padStart(2, '0');
-    const decSecond = String(Math.floor(totalDecimalSeconds % 100)).padStart(2, '0');
-    const decimalString = `${decHour}:${decMinute}:${decSecond}`;
-
-    // 2. МАРСИАНСКОЕ ВРЕМЯ (Сол длится 88775.244 секунд Земли вместо 86400)
-    const marsFraction = secondsSinceMidnight / 88775.244;
-    const marsTotalSeconds = marsFraction * 86400; // раскладываем Марс обратно на их 24 "марсианских" часа
-    const marsH = String(Math.floor(marsTotalSeconds / 3600) % 24).padStart(2, '0');
-    const marsM = String(Math.floor((marsTotalSeconds % 3600) / 60)).padStart(2, '0');
-    const marsS = String(Math.floor(marsTotalSeconds % 60)).padStart(2, '0');
-
-    // 3. ЛУННОЕ ВРЕМЯ (Сутки на Луне длятся 27.3 земных суток)
-    // Показывает текущую фазу лунного дня в процентах для простоты понимания "на ходу"
-    const moonProgress = ((decimalDayFraction / 27.3) * 100).toFixed(4);
-
-    // 4. ВЕНЕРИАНСКОЕ ВРЕМЯ (Сутки длятся аж 243 земных дня!)
-    const venusProgress = ((decimalDayFraction / 243) * 100).toFixed(5);
-
-    // 5. СОЛНЕЧНОЕ ВРЕМЯ (Полный оборот экватора Солнца занимает около 25.05 земных суток)
-    const sunProgress = ((decimalDayFraction / 25.05) * 100).toFixed(4);
-
-    // Склеиваем все космические метрики в одну строку с большими отступами (&nbsp;)
-    const spaceText = `🪐 ДЕСЯТИЧНОЕ ВРЕМЯ (Земля): ${decimalString} &nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp; 
-                       🚀 МАРСИАНСКОЕ ВРЕМЯ (Сол): ${marsH}:${marsM}:${marsS} &nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp; 
-                       🌙 ЛУННЫЙ ДЕНЬ (Прогресс суток): ${moonProgress}% &nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp; 
-                       🌋 ВЕНЕРИАНСКИЕ СУТКИ: ${venusProgress}% &nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp; 
-                       ☀️ ОБОРОТ СОЛНЦА ВОКРУГ ОСИ: ${sunProgress}%`;
+    // ==========================================
+    // МАТЕМАТИКА КОСМИЧЕСКИХ КАЛЕНДАРЕЙ
+    // ==========================================
     
-    // Вставляем получившуюся ленту в бегущую строку
+    // 1. Вычисляем точное количество земных суток, прошедших с 1 января 1 года н.э.
+    // UTC-время в миллисекундах для текущего момента
+    const currentMs = now.getTime();
+    // UTC-время в миллисекундах для 1 января 1 года нашей эры
+    const eraStartMs = Date.UTC(1, 0, 1, 0, 0, 0, 0);
+    // Общая разница в земных сутках (с дробной частью текущего дня)
+    const totalEarthDays = (currentMs - eraStartMs) / (1000 * 60 * 60 * 24);
+
+    // 2. ВЕНЕРА (Год = 224.7 земных суток, Солнечные сутки = 116.75 земных суток)
+    const venusYearsTotal = totalEarthDays / 224.7;
+    const venusYearCurrent = Math.floor(venusYearsTotal) + 1;
+    const venusDaysTotal = totalEarthDays / 116.75;
+    const venusDayCurrent = Math.floor(venusDaysTotal) + 1;
+    const venusDayProgress = ((venusDaysTotal % 1) * 100).toFixed(2);
+
+    // 3. МАРС (Год = 686.98 земных суток, Сол/сутки = 1.025957 земных суток)
+    const marsYearsTotal = totalEarthDays / 686.98;
+    const marsYearCurrent = Math.floor(marsYearsTotal) + 1;
+    const marsSolsTotal = totalEarthDays / 1.025957;
+    const marsSolCurrent = Math.floor(marsSolsTotal) + 1;
+    const marsSolProgress = ((marsSolsTotal % 1) * 100).toFixed(2);
+
+    // 4. ЛУНА (Расчет фазы на основе синодического месяца ~29.53059 суток)
+    // Известное базовое новолуние (например, 6 января 2000 года)
+    const knownNewMoonMs = Date.UTC(2000, 0, 6, 18, 14, 0);
+    const moonCycles = (currentMs - knownNewMoonMs) / (1000 * 60 * 60 * 24 * 29.53059);
+    const moonAgeDays = (moonCycles % 1) * 29.53059; // Сколько дней прошло с последнего новолуния
+    
+    let moonPhaseText = "";
+    // Процент освещенности диска Луны для вывода на экран
+    let moonIllumination = 0;
+
+    if (moonAgeDays < 14.765) {
+        moonPhaseText = "Растущая";
+        moonIllumination = ((moonAgeDays / 14.765) * 100).toFixed(1);
+    } else {
+        moonPhaseText = "Убывающая";
+        moonIllumination = (((29.53059 - moonAgeDays) / 14.765) * 100).toFixed(1);
+    }
+    // Отлавливаем крайние красивые точки
+    if (moonAgeDays < 0.5 || moonAgeDays > 29.0) { moonPhaseText = "Новолуние"; moonIllumination = "0"; }
+    else if (Math.abs(moonAgeDays - 14.76) < 0.5) { moonPhaseText = "Полнолуние"; moonIllumination = "100"; }
+
+    // 5. СОЛНЦЕ (Оборот Кэррингтона равен 25.38 земных суток. Начало отсчета — 9 ноября 1853 г.)
+    const carringtonStartMs = Date.UTC(1853, 10, 9, 12, 0, 0);
+    const sunRotationsTotal = (currentMs - carringtonStartMs) / (1000 * 60 * 60 * 24 * 25.38);
+    const sunRotationCurrent = Math.floor(sunRotationsTotal) + 1;
+    const sunRotationProgress = ((sunRotationsTotal % 1) * 100).toFixed(2);
+
+    // Сборка общей информационной ленты
+    const spaceText = `🌙 ЛУНА: ${moonPhaseText} (${moonIllumination}%) &nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp; 
+                       🌋 ВЕНЕРА: ${venusDayCurrent}-ие сутки ${venusYearCurrent}-го года (день завершен на ${venusDayProgress}%) &nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp; 
+                       🚀 МАРС: ${marsSolCurrent}-ый Сол ${marsYearCurrent}-го года (завершен на ${marsSolProgress}%) &nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp; 
+                       ☀️ СОЛНЦЕ: идет ${sunRotationCurrent}-ый оборот вокруг оси (текущий цикл выполнен на ${sunRotationProgress}%)`;
+    
     document.getElementById("spaceLenta").innerHTML = spaceText;
 
-    // ===== Умный таймер рабочего графика (Правый верхний угол) =====
+    // ===== Логика таймера рабочего дня (Осталась без изменений) =====
     const currentDay = now.getDay();
     const startOfWorkToday = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 8, 0, 0, 0);
     let endOfWorkToday = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 17, 15, 0, 0);
@@ -264,7 +219,6 @@ function updateClocks() {
         labelText = "До конца рабочего дня:";
         targetTime = endOfWorkToday;
 
-        // Плавный перелив цвета внутри рабочего периода
         const totalWorkMs = endOfWorkToday - startOfWorkToday;
         const passedWorkMs = now - startOfWorkToday;
         const progress = passedWorkMs / totalWorkMs;
@@ -276,7 +230,7 @@ function updateClocks() {
         timerElement.style.color = `rgb(${r}, ${g}, ${b})`;
     } else {
         labelText = "До начала рабочего дня:";
-        timerElement.style.color = "#ff5555"; // Вне работы таймер горит классическим красным
+        timerElement.style.color = "#ff5555";
         
         let nextTarget = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 8, 0, 0, 0);
         
@@ -303,7 +257,6 @@ function updateClocks() {
     timerElement.textContent = `${th}:${tm}:${ts}`;
 }
 
-// Стартовая инициализация скриптов при запуске
 fetchUTCTime().then(() => {
     updateClocks();
     setInterval(updateClocks, 50);
