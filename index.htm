@@ -42,18 +42,61 @@ body {
     margin-top: 25px;
 /* Закрывает блок стилей для класса .label */
 }
+/* Начинает описание стилей для нашего нового квадрата-пробника */
+.color-box {
+    /* Делает элемент блочно-строчным, чтобы он мог иметь размеры, но оставался в строке с текстом */
+    display: inline-block;
+    /* Задает ширину квадрата в 24 пикселя */
+    width: 24px;
+    /* Задает высоту квадрата в 24 пикселя */
+    height: 24px;
+    /* Делает небольшой отступ справа от квадрата, чтобы он не прилипал к цифрам */
+    margin-right: 15px;
+    /* Сдвигает квадрат немного вниз по вертикали, чтобы он стоял ровно по центру строки с цифрами */
+    vertical-align: middle;
+    /* Сглаживает углы квадрата на 4 пикселя, делая его вид более аккуратным */
+    border-radius: 4px;
+/* Закрывает блок стилей для класса .color-box */
+}
+/* Специфичный стиль для пробника обычных часов */
+#box-normal {
+    /* Меняй этот HEX-код, чтобы перекрасить квадрат обычных часов */
+    background-color: #aaa;
+/* Закрывает стиль для #box-normal */
+}
+/* Специфичный стиль для пробника десятичных часов */
+#box-decimal {
+    /* Меняй этот HEX-код, чтобы перекрасить квадрат десятичных часов */
+    background-color: #00ffff;
+/* Закрывает стиль для #box-decimal */
+}
+/* Специфичный стиль для пробника таймера */
+#box-timer {
+    /* Меняй этот HEX-код, чтобы перекрасить квадрат таймера */
+    background-color: #ff5555;
+/* Закрывает стиль для #box-timer */
+}
 </style>
 </head>
 <body>
 
 <div class="label">Обычное время (24 часа)</div>
-<div id="normalClock" class="clock">--:--:--</div>
+<div class="clock">
+    <span id="box-normal" class="color-box"></span>
+    <span id="normalClock">--:--:--</span>
+</div>
 
 <div class="label">Десятичное время (10ч × 100 × 100)</div>
-<div id="decimalClock" class="clock">--:--:--</div>
+<div class="clock">
+    <span id="box-decimal" class="color-box"></span>
+    <span id="decimalClock">--:--:--</span>
+</div>
 
 <div id="timerLabel" class="label">Загрузка таймера...</div>
-<div id="countdownTimer" class="timer">--:--:--</div>
+<div class="timer">
+    <span id="box-timer" class="color-box"></span>
+    <span id="countdownTimer">--:--:--</span>
+</div>
 
 <script>
 // Создает переменную для точного времени. Пока интернет-ответ не пришел, внутри лежит пустота (null)
@@ -86,7 +129,7 @@ async function fetchUTCTime() {
 // Закрывает асинхронную функцию fetchUTCTime
 }
 
-// Объявляет функцию, которая отвечает за ежеминутный перерасчет и перерисовку всех цифр
+// Объявляет функцию, которая отвечает за перерасчет и перерисовку всех цифр
 function updateClocks() {
     // Проверяет: если baseTime еще пустой (сервер долго отвечает при старте), прервать функцию
     if (!baseTime) return;
@@ -103,7 +146,7 @@ function updateClocks() {
     const m = String(now.getMinutes()).padStart(2, '0');
     // Получает секунды текущего времени и приводит их к красивому виду с ведущим нулем
     const s = String(now.getSeconds()).padStart(2, '0');
-    // Находит блок с id "normalClock" и заменяет его текст на строку вида ЧЧ:ММ:СС
+    // Находит элемент с id "normalClock" и обновляет только текстовые цифры времени, не трогая квадрат
     document.getElementById("normalClock").textContent = `${h}:${m}:${s}`;
 
     // ===== Десятичное время =====
@@ -136,7 +179,7 @@ function updateClocks() {
     // Приводит десятичные секунды к итоговому двухзначному виду перед выводом на экран
     const ds = String(decSecond).padStart(2, '0');
 
-    // Ищет на странице элемент id "decimalClock" и выводит туда десятичное время
+    // Находит элемент id "decimalClock" и обновляет только его текстовые цифры
     document.getElementById("decimalClock").textContent = `${dh}:${dm}:${ds}`;
 
     // ===== Умный таймер рабочего графика =====
@@ -211,7 +254,7 @@ function updateClocks() {
 
     // Находит элемент id "timerLabel" и обновляет подпись ("До конца..." или "До начала...")
     document.getElementById("timerLabel").textContent = labelText;
-    // Находит элемент id "countdownTimer" и выводит туда тикающие цифры ЧЧ:ММ:СС
+    // Находит элемент id "countdownTimer" и обновляет только его текстовые тикающие цифры ЧЧ:ММ:СС
     document.getElementById("countdownTimer").textContent = `${th}:${tm}:${ts}`;
 // Полностью закрывает главную функцию updateClocks
 }
