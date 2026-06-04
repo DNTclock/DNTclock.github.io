@@ -14,7 +14,7 @@ body {
     overflow: hidden;
 }
 
-/* СТАТИЧНЫЙ БЛОК ПОГОДЫ В ЛЕВОМ ВЕРХНЕМ УГЛУ (Голубая зона с макета) */
+/* СТАТИЧНЫЙ БЛОК ПОГОДЫ В ЛЕВОМ ВЕРХНЕМ УГЛУ */
 .weather-static-panel {
     position: fixed;
     left: 20px;
@@ -23,7 +23,7 @@ body {
     background: rgba(26, 26, 36, 0.7);
     padding: 15px;
     border-radius: 8px;
-    border-left: 4px solid #00e5ff; /* Голубой маркер как на макете */
+    border-left: 4px solid #00e5ff;
     font-size: 13px;
     line-height: 1.6;
     max-width: 300px;
@@ -50,14 +50,12 @@ body {
     text-align: right;
 }
 
-/* Контейнер, который выстраивает часы и таймер в один ряд */
 .flex-time-row {
     display: flex;
     align-items: baseline;
-    gap: 25px; /* Отступ между часами и таймером */
+    gap: 25px;
 }
 
-/* Блок земного времени */
 .time-block {
     text-align: right;
 }
@@ -71,12 +69,11 @@ body {
 }
 
 .clock-digits {
-    font-size: 32px; /* Размер теперь строго как у таймера */
+    font-size: 32px;
     font-weight: bold;
-    color: #fff; /* Всегда белый */
+    color: #fff;
 }
 
-/* Блок таймера */
 .timer-block {
     text-align: right;
 }
@@ -94,7 +91,7 @@ body {
     transition: color 0.5s ease;
 }
 
-/* ЦЕНТРАЛЬНАЯ ЗОНА ДЛЯ ТВОЕГО ОСНОВНОГО КОНТЕНТА */
+/* ЦЕНТРАЛЬНАЯ ЗОНА ДЛЯ ОСНОВНОГО КОНТЕНТА (ЗАГЛУШКА) */
 .main-content-area {
     position: absolute;
     top: 150px;
@@ -102,11 +99,12 @@ body {
     transform: translateX(-50%);
     width: 80%;
     text-align: center;
-    color: #666;
-    font-size: 18px;
-    border: 1px dashed #333; /* Временная рамка, показывающая границы центра */
-    padding: 40px;
+    color: #444;
+    font-size: 16px;
+    border: 1px dashed #222;
+    padding: 60px;
     border-radius: 8px;
+    letter-spacing: 2px;
 }
 
 /* КОСМИЧЕСКАЯ БЕГУЩАЯ СТРОКА ВНИЗУ */
@@ -179,8 +177,7 @@ body {
 </div>
 
 <div class="main-content-area">
-    📺 МЕСТО ДЛЯ ОСНОВНОГО КОНТЕНТА<br>
-    <span style="font-size: 13px; color: #444;">(данный блок можно наполнять любыми таблицами или графиками)</span>
+    [ В РАЗРАБОТКЕ ]
 </div>
 
 <div class="tester-container">
@@ -213,7 +210,6 @@ async function fetchUTCTime() {
     }
 }
 
-// Запрос РЕАЛЬНОЙ погоды и раскладывание её в столбик
 async function fetchRealWeather() {
     try {
         const res = await fetch('https://wttr.in/?format=j1');
@@ -248,10 +244,8 @@ function updateClocks() {
     const delta = Date.now() - lastFetch;
     const now = new Date(baseTime.getTime() + delta);
 
-    // Локальный часовой пояс наблюдателя
     document.getElementById("timezoneLabel").textContent = `Время [ ${userTimezone} ]`;
 
-    // Точные белые часы в строку
     const h = String(now.getHours()).padStart(2, '0');
     const m = String(now.getMinutes()).padStart(2, '0');
     const s = String(now.getSeconds()).padStart(2, '0');
@@ -299,7 +293,6 @@ function updateClocks() {
         targetTime = nextTarget;
     }
 
-    // Красится только сам таймер, часы остаются белыми
     timerElement.style.color = dynamicColor;
 
     const diffMs = targetTime - now;
