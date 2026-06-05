@@ -5,7 +5,6 @@
 <title>OrdoSkipit</title>
 <style>
 /* --- ОБЩЕСТРАНИЧНОЕ: Базовые стили для всего документа --- */
-/* Устанавливаем темную тему, шрифт консоли и фиксируем размер окна */
 body {
     background: #111;
     color: #eee;
@@ -16,8 +15,7 @@ body {
     overflow: hidden;
 }
 
-/* --- БЛОК ПОГОДЫ: Стилизация контейнера метеоданных --- */
-/* Фиксируем блок в углу, чтобы он оставался видимым всегда */
+/* --- БЛОК ПОГОДЫ --- */
 .weather-static-panel {
     position: fixed;
     left: 20px;
@@ -32,8 +30,6 @@ body {
     max-width: 300px;
     z-index: 1000;
 }
-
-/* Заголовок метеостанции для визуального выделения */
 .weather-title {
     color: #00e5ff;
     font-weight: bold;
@@ -41,8 +37,7 @@ body {
     font-size: 14px;
 }
 
-/* --- ЧАСЫ И ТАЙМЕР: Блок контроля времени --- */
-/* Размещаем в правом углу, отделяем от остального интерфейса */
+/* --- ЧАСЫ И ТАЙМЕР --- */
 .control-panel-corner {
     position: fixed;
     right: 30px;
@@ -54,75 +49,70 @@ body {
     z-index: 999;
     text-align: right;
 }
-
-/* Сетка для выравнивания блока часов и таймера рядом */
 .flex-time-row {
     display: flex;
     align-items: baseline;
     gap: 25px;
 }
-
 .time-block, .timer-block {
     text-align: right;
 }
-
-/* Подписи к цифрам для понимания, что именно отображается */
 .timezone-sub, .timer-sub {
     font-size: 11px;
     color: #666;
     display: block;
     margin-bottom: 2px;
 }
-
-.timezone-sub {
-    letter-spacing: 0.5px;
-}
-
-/* Настройка шрифта для цифровых значений */
 .clock-digits, .timer-digits {
     font-size: 32px;
     font-weight: bold;
 }
+.clock-digits { color: #fff; }
+.timer-digits { transition: color 0.5s ease; }
 
-.clock-digits {
-    color: #fff;
-}
-
-/* Анимация изменения цвета для таймера */
-.timer-digits {
-    transition: color 0.5s ease;
-}
-
-/* --- ОСНОВНОЕ ПОЛЕ: Центральная рабочая зона --- */
-/* Контейнер для контента, центрирован относительно экрана */
+/* --- ORDOSKIPIT: ГЛАВНАЯ ЗОНА ТАБЛИЦЫ --- */
+/* Занимает всю свободную площадь от верхних панелей до нижнего блока ввода */
 .main-content-area {
     position: absolute;
-    top: 150px;
+    top: 140px; /* Отступ сверху, чтобы не перекрывать часы и погоду */
+    bottom: 130px; /* Отступ снизу, оставляем место для блока ввода */
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80%; /* Растягиваем по ширине */
+    background: rgba(20, 20, 20, 0.9);
+    border: 1px solid #222;
+    border-radius: 8px;
+    padding: 20px;
+    box-sizing: border-box;
+    
+    /* Включаем скроллбары */
+    overflow-y: auto; 
+    overflow-x: hidden;
+}
+.table-row { 
+    border-bottom: 1px solid #222; 
+    padding: 10px 0; 
+    font-size: 14px; 
+    text-align: left; 
+}
+
+/* --- ORDOSKIPIT: НИЖНИЙ БЛОК ВВОДЫ ДАННЫХ --- */
+/* Фиксируем строго внизу экрана над бегущей строкой */
+.input-panel-bottom {
+    position: fixed;
+    bottom: 50px; /* Сразу над бегущей строкой */
     left: 50%;
     transform: translateX(-50%);
     width: 80%;
-    text-align: center;
-    color: #444;
-    font-size: 16px;
-    border: 1px dashed #222;
-    padding: 60px;
+    background: rgba(20, 20, 20, 0.95);
+    border: 1px dashed #333;
+    padding: 15px;
     border-radius: 8px;
-    letter-spacing: 2px;
+    box-sizing: border-box;
+    z-index: 998;
 }
-    
-/* --- БЛОК ТАБЛИЦЫ (OrdoSkipit Data) --- */
-/* Контейнер для вывода данных. Добавлен для отображения контента из таблицы 
-.main-content-area {
-    position: absolute; top: 150px; left: 50%; transform: translateX(-50%);
-    width: 60%; height: 50vh; overflow-y: auto;
-    background: rgba(20, 20, 20, 0.9);
-    border: 1px solid #333; padding: 20px; border-radius: 8px;
-}*/
-.table-row { border-bottom: 1px solid #333; padding: 8px 0; font-size: 14px; }
 
-    
-/* --- БЕГУЩАЯ СТРОКА: Нижняя информационная панель --- */
-/* Фиксируем в самом низу страницы на всю ширину */
+/* --- БЕГУЩАЯ СТРОКА --- */
 .space-marquee {
     position: fixed;
     left: 0;
@@ -136,19 +126,18 @@ body {
     border-top: 1px solid #333;
 }
 
-/* --- ТЕСТЕР ЦВЕТА: Вспомогательный UI-элемент --- */
+/* --- ТЕСТЕР ЦВЕТА --- */
 .tester-container {
     position: fixed;
     right: 20px;
-    bottom: 50px;
+    bottom: 140px; /* Подняли чуть выше, чтобы не перекрывать ввод */
     text-align: left;
     background: rgba(30, 30, 30, 0.8);
     padding: 15px;
     border-radius: 8px;
     border: 1px solid #444;
+    z-index: 1000;
 }
-
-/* Визуальный индикатор цвета */
 .live-box {
     display: inline-block;
     width: 30px;
@@ -158,8 +147,6 @@ body {
     vertical-align: middle;
     margin-right: 10px;
 }
-
-/* Поле ввода для тестирования HEX-кодов */
 .color-input {
     width: 120px;
     padding: 5px;
@@ -192,20 +179,18 @@ body {
     </div>
 </div>
 
-<div class="main-content-area">
-    <div id="dbDataContainer" style="max-height: 70%; overflow-y: auto; margin-bottom: 15px;">
-        OrdoSkipit: инициализация потока данных...
-    </div>
+<div class="main-content-area" id="dbDataContainer">
+    OrdoSkipit: инициализация потока данных...
+</div>
 
-    <div style="border-top: 1px dashed #333; padding-top: 15px; text-align: left;">
-        <span style="color: #00e5ff; font-size: 12px; display: block; margin-bottom: 5px;">[ ВВОД НОВЫХ ДАННЫХ В ORDOSKIPIT ]</span>
-        <div style="display: flex; gap: 10px;">
-            <input type="text" id="inputAuthor" placeholder="Автор (напр. Сержант)" style="background: #222; color: #fff; border: 1px solid #444; padding: 8px; border-radius: 4px; font-family: inherit; width: 30%;">
-            <input type="text" id="inputText" placeholder="Введите текст сообщения..." style="background: #222; color: #fff; border: 1px solid #444; padding: 8px; border-radius: 4px; font-family: inherit; flex-grow: 1;">
-            <button id="btnSubmit" style="background: #00e5ff; color: #111; border: none; padding: 8px 15px; border-radius: 4px; font-family: inherit; font-weight: bold; cursor: pointer; transition: background 0.2s;">ОТПРАВИТЬ</button>
-        </div>
-        <div id="sendStatus" style="font-size: 11px; margin-top: 5px; color: #666;"></div>
+<div class="input-panel-bottom">
+    <span style="color: #00e5ff; font-size: 12px; display: block; margin-bottom: 5px;">[ ВВОД НОВЫХ ДАННЫХ В ORDOSKIPIT ]</span>
+    <div style="display: flex; gap: 10px;">
+        <input type="text" id="inputAuthor" placeholder="Автор (напр. Сержант)" style="background: #222; color: #fff; border: 1px solid #444; padding: 8px; border-radius: 4px; font-family: inherit; width: 25%;">
+        <input type="text" id="inputText" placeholder="Введите текст сообщения..." style="background: #222; color: #fff; border: 1px solid #444; padding: 8px; border-radius: 4px; font-family: inherit; flex-grow: 1;">
+        <button id="btnSubmit" style="background: #00e5ff; color: #111; border: none; padding: 8px 15px; border-radius: 4px; font-family: inherit; font-weight: bold; cursor: pointer; transition: background 0.2s;">ОТПРАВИТЬ</button>
     </div>
+    <div id="sendStatus" style="font-size: 11px; margin-top: 5px; color: #666;"></div>
 </div>
 
 <div class="tester-container">
