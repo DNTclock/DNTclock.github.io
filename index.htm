@@ -192,8 +192,20 @@ body {
     </div>
 </div>
 
-<div class="main-content-area" id="dbDataContainer">
-    OrdoSkipit: инициализация потока данных...
+<div class="main-content-area">
+    <div id="dbDataContainer" style="max-height: 70%; overflow-y: auto; margin-bottom: 15px;">
+        OrdoSkipit: инициализация потока данных...
+    </div>
+
+    <div style="border-top: 1px dashed #333; padding-top: 15px; text-align: left;">
+        <span style="color: #00e5ff; font-size: 12px; display: block; margin-bottom: 5px;">[ ВВОД НОВЫХ ДАННЫХ В ORDOSKIPIT ]</span>
+        <div style="display: flex; gap: 10px;">
+            <input type="text" id="inputAuthor" placeholder="Автор (напр. Сержант)" style="background: #222; color: #fff; border: 1px solid #444; padding: 8px; border-radius: 4px; font-family: inherit; width: 30%;">
+            <input type="text" id="inputText" placeholder="Введите текст сообщения..." style="background: #222; color: #fff; border: 1px solid #444; padding: 8px; border-radius: 4px; font-family: inherit; flex-grow: 1;">
+            <button id="btnSubmit" style="background: #00e5ff; color: #111; border: none; padding: 8px 15px; border-radius: 4px; font-family: inherit; font-weight: bold; cursor: pointer; transition: background 0.2s;">ОТПРАВИТЬ</button>
+        </div>
+        <div id="sendStatus" style="font-size: 11px; margin-top: 5px; color: #666;"></div>
+    </div>
 </div>
 
 <div class="tester-container">
@@ -428,6 +440,63 @@ async function init() {
         dom.liveBox.style.backgroundColor = e.target.value;
     });
 
+// --- БЛОК ОТПРАВКИ ДАННЫХ В ТАБЛИЦУ ---
+    const btnSubmit = document.getElementById("btnSubmit");
+    const inputAuthor = document.getElementById("inputAuthor");
+    const inputText = document.getElementById("inputText");
+    const sendStatus = document.getElementById("sendStatus");
+
+    btnSubmit.addEventListener("click", async () => {
+        // Проверяем, чтобы поля не были пустыми
+        if (!inputAuthor.value.trim() || !inputText.value.trim()) {
+            sendStatus.textContent = "Ошибка: Заполните оба поля!";
+            sendStatus.style.color = "#ff5555";
+            return;
+        }
+
+        // Блокируем кнопку на время отправки, чтобы избежать дублей
+        btnSubmit.disabled = true;
+        btnSubmit.style.background = "#555";
+        sendStatus.textContent = "Отправка пакета данных...";
+        sendStatus.style.color = "#aaa";
+
+        try {
+            // Формируем параметры для отправки формата URL-encoded (наиболее стабильный для GAS)
+            const formData = new URLSearchParams();
+            formData.append("author", inputAuthor.value.trim());
+            formData.append("text", inputText.value.trim());
+
+            // Делаем POST-запрос к Google Apps Script
+            const response = await fetch(SCRIPT_URL, {
+                method: "POST",
+                mode: "no-cors", // Используем no-cors, так как Google делает редиректы, которые браузер считает небезопасными
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded"
+                },
+                body: formData.toString()
+            });
+
+            // Так как режим no-cors не возвращает ответ, мы предполагаем успех, если нет ошибки сети
+            sendStatus.textContent = "Данные успешно переданы в OrdoSkipit!";
+            sendStatus.style.color = "#00ffaa";
+
+            // Очищаем поле текста, а автора оставляем для удобства
+            inputText.value = "";
+
+            // Сразу же принудительно обновляем таблицу, чтобы увидеть свою запись (через 1.5 секунды, чтобы Google успел обработать)
+            setTimeout(loadTableData, 1500);
+
+        } catch (error) {
+            console.error("Ошибка отправки:", error);
+            sendStatus.textContent = `Критический сбой: ${error.message}`;
+            sendStatus.style.color = "#ff5555";
+        } finally {
+            // Возвращаем кнопку в рабочее состояние
+            btnSubmit.disabled = false;
+            btnSubmit.style.background = "#00e5ff";
+        }
+    });
+    
     // Запуск таймеров обновления данных
     updateClocks();
     setInterval(updateClocks, 1000);        // Обновление цифр каждую секунду
