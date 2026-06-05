@@ -156,6 +156,12 @@ body {
     <div style="color: #aaa;">Связь со спутником...</div>
 </div>
 
+<div style="margin-top: 20px; padding: 20px; border: 1px solid #444;">
+    <input type="text" id="authorInput" placeholder="Имя" style="background:#222; color:#fff; border:none; padding:5px;">
+    <input type="text" id="textInput" placeholder="Сообщение" style="background:#222; color:#fff; border:none; padding:5px; width: 300px;">
+    <button onclick="sendData()" style="background:#00e5ff; border:none; padding:5px 15px; cursor:pointer;">ОТПРАВИТЬ В БАЗУ</button>
+</div>
+    
 <div class="control-panel-corner">
     <div class="flex-time-row">
         <div class="time-block">
@@ -185,6 +191,28 @@ body {
 </marquee>
 
 <script>
+
+    async function sendData() {
+    const author = document.getElementById('authorInput').value;
+    const text = document.getElementById('textInput').value;
+    
+    await fetch(SCRIPT_URL, {
+        method: 'POST',
+        body: JSON.stringify({author, text})
+    });
+    
+    loadTableData(); // Обновит список после отправки
+}
+
+async function loadTableData() {
+    const container = document.querySelector('.main-content-area');
+    try {
+        const response = await fetch(SCRIPT_URL);
+        const data = await response.json();
+        container.innerHTML = data.map(row => `<div>${row.text}</div>`).join('');
+    } catch (e) { console.error("Ошибка загрузки данных", e); }
+}
+    
 // КОНСТАНТЫ И НАСТРОЙКИ (Астрономические и календарные данные)
 const MS_IN_DAY = 86400000;
 const LUNAR_CYCLE_MS = 2551443180;      // Средняя продолжительность синодического месяца Луны
