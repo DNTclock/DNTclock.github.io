@@ -2,6 +2,7 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>OrdoSkipit</title>
 <style>
 /* --- ОБЩЕСТРАНИЧНОЕ: Базовые стили для всего документа --- */
@@ -71,36 +72,32 @@ body {
 .timer-digits { transition: color 0.5s ease; }
 
 /* --- ORDOSKIPIT: ГЛАВНАЯ ЗОНА ТАБЛИЦЫ --- */
-/* Занимает всю свободную площадь от верхних панелей до нижнего блока ввода */
 .main-content-area {
     position: absolute;
-    top: 140px; /* Отступ сверху, чтобы не перекрывать часы и погоду */
-    bottom: 130px; /* Отступ снизу, оставляем место для блока ввода */
+    top: 140px; 
+    bottom: 140px; /* Увеличили зазор снизу для удобства мобильного ввода */
     left: 50%;
     transform: translateX(-50%);
-    width: 80%; /* Растягиваем по ширине */
+    width: 80%; 
     background: rgba(20, 20, 20, 0.9);
     border: 1px solid #222;
     border-radius: 8px;
     padding: 20px;
     box-sizing: border-box;
-    
-    /* Включаем скроллбары */
     overflow-y: auto; 
     overflow-x: hidden;
 }
 .table-row { 
     border-bottom: 1px solid #222; 
     padding: 10px 0; 
-    font-size: 14px; 
+    font-size: 14px; /* Базовый размер для ПК */
     text-align: left; 
 }
 
-/* --- ORDOSKIPIT: НИЖНИЙ БЛОК ВВОДЫ ДАННЫХ --- */
-/* Фиксируем строго внизу экрана над бегущей строкой */
+/* --- ORDOSKIPIT: НИЖНИЙ БЛОК ВВОДА ДАННЫХ --- */
 .input-panel-bottom {
     position: fixed;
-    bottom: 50px; /* Сразу над бегущей строкой */
+    bottom: 50px; 
     left: 50%;
     transform: translateX(-50%);
     width: 80%;
@@ -110,6 +107,10 @@ body {
     border-radius: 8px;
     box-sizing: border-box;
     z-index: 998;
+}
+.flex-input-row {
+    display: flex; 
+    gap: 10px;
 }
 
 /* --- БЕГУЩАЯ СТРОКА --- */
@@ -126,36 +127,67 @@ body {
     border-top: 1px solid #333;
 }
 
-/* --- ТЕСТЕР ЦВЕТА --- */
-.tester-container {
-    position: fixed;
-    right: 20px;
-    bottom: 140px; /* Подняли чуть выше, чтобы не перекрывать ввод */
-    text-align: left;
-    background: rgba(30, 30, 30, 0.8);
-    padding: 15px;
-    border-radius: 8px;
-    border: 1px solid #444;
-    z-index: 1000;
-}
-.live-box {
-    display: inline-block;
-    width: 30px;
-    height: 30px;
-    background-color: #888;
-    border-radius: 4px;
-    vertical-align: middle;
-    margin-right: 10px;
-}
-.color-input {
-    width: 120px;
-    padding: 5px;
-    background: #222;
-    color: #fff;
-    border: 1px solid #555;
-    border-radius: 4px;
-    font-family: inherit;
-    vertical-align: middle;
+/* --- АДАПТИВНОСТЬ ДЛЯ МОБИЛЬНЫХ УСТРОЙСТВ (Экраны до 768px) --- */
+@media (max-width: 768px) {
+    body {
+        overflow: auto; /* Разрешаем скролл самой страницы, если виджеты не влезают */
+    }
+    
+    /* Перестраиваем верхние панели, чтобы не накладывались */
+    .weather-static-panel {
+        position: absolute;
+        left: 5%;
+        top: 10px;
+        width: 90%;
+        max-width: none;
+        box-sizing: border-box;
+    }
+    .control-panel-corner {
+        position: absolute;
+        left: 5%;
+        top: 135px;
+        width: 90%;
+        box-sizing: border-box;
+        text-align: center;
+    }
+    .flex-time-row {
+        justify-content: center;
+    }
+    .time-block, .timer-block {
+        text-align: center;
+    }
+
+    /* Главная зона таблицы подстраивается под мобильный экран */
+    .main-content-area {
+        top: 245px;
+        bottom: 195px;
+        width: 95%;
+        padding: 10px;
+    }
+    
+    /* КРУПНЫЙ ШРИФТ ДЛЯ ТЕЛЕФОНА */
+    .table-row {
+        font-size: 16px; /* Сообщения на телефоне станут крупнее и читаемее */
+        padding: 12px 0;
+    }
+
+    /* Блок ввода перебиваем в вертикальный режим, чтобы удобно тапать пальцем */
+    .input-panel-bottom {
+        bottom: 45px;
+        width: 95%;
+        padding: 10px;
+    }
+    .flex-input-row {
+        flex-direction: column; /* Элементы встают друг под друга */
+        gap: 8px;
+    }
+    #inputAuthor {
+        width: 100% !important; /* Автор на всю ширину */
+    }
+    #inputAuthor, #inputText, #btnSubmit {
+        font-size: 16px; /* Крупный шрифт для полей, чтобы iOS/Android не зумили экран при вводе */
+        padding: 10px;
+    }
 }
 </style>
 </head>
@@ -185,18 +217,12 @@ body {
 
 <div class="input-panel-bottom">
     <span style="color: #00e5ff; font-size: 12px; display: block; margin-bottom: 5px;">[ ВВОД НОВЫХ ДАННЫХ В ORDOSKIPIT ]</span>
-    <div style="display: flex; gap: 10px;">
-        <input type="text" id="inputAuthor" placeholder="Автор (напр. Сержант)" style="background: #222; color: #fff; border: 1px solid #444; padding: 8px; border-radius: 4px; font-family: inherit; width: 25%;">
+    <div class="flex-input-row">
+        <input type="text" id="inputAuthor" placeholder="Автор" style="background: #222; color: #fff; border: 1px solid #444; padding: 8px; border-radius: 4px; font-family: inherit; width: 25%;">
         <input type="text" id="inputText" placeholder="Введите текст сообщения..." style="background: #222; color: #fff; border: 1px solid #444; padding: 8px; border-radius: 4px; font-family: inherit; flex-grow: 1;">
         <button id="btnSubmit" style="background: #00e5ff; color: #111; border: none; padding: 8px 15px; border-radius: 4px; font-family: inherit; font-weight: bold; cursor: pointer; transition: background 0.2s;">ОТПРАВИТЬ</button>
     </div>
     <div id="sendStatus" style="font-size: 11px; margin-top: 5px; color: #666;"></div>
-</div>
-
-<div class="tester-container">
-    <div style="font-size: 12px; color: #888; margin-bottom: 5px;">Проба цвета на ходу:</div>
-    <span id="liveBox" class="live-box"></span>
-    <input type="text" id="colorInput" class="color-input" placeholder="#00ffff">
 </div>
 
 <marquee class="space-marquee" scrollamount="4" id="spaceMarquee">
@@ -204,18 +230,14 @@ body {
 </marquee>
 
 <script>
-
-// Твой рабочий URL из Google Apps Script
 const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby899DghhixLfbMIY_TblWR5y9_cNznKP37XZ_WdNpXDVLk_VQdkqoZjUT4vgTsw31sww/exec';
 
 /* --- БЛОК ТАБЛИЦЫ: Загрузка --- */
-// Запрашивает данные по ссылке SCRIPT_URL и отрисовывает их в OrdoSkipit-контейнер
 async function loadTableData() {
     const container = document.getElementById('dbDataContainer');
     try {
         const response = await fetch(SCRIPT_URL);
         const data = await response.json(); 
-        // Каждая строка таблицы превращается в div с классом table-row
         container.innerHTML = data.map(row => `
             <div class="table-row">
                 <span style="color:#00e5ff;">[${row.author || 'SYSTEM'}]</span>: ${row.text || '...' }
@@ -226,33 +248,27 @@ async function loadTableData() {
     }
 }
     
-/* --- КОНСТАНТЫ И НАСТРОЙКИ: Математическая база расчетов --- */
 const MS_IN_DAY = 86400000;
-const LUNAR_CYCLE_MS = 2551443180;      // Продолжительность лунного месяца в мс
-const SUN_ROTATION_MS = 2192832000;     // Длительность оборота Солнца в мс
-const VENUS_YEAR_EARTH_DAYS = 224.7;    // Венера: земные дни в году
-const VENUS_SOL_EARTH_DAYS = 116.75;    // Венера: земные дни в сутках
-const MARS_YEAR_EARTH_DAYS = 686.98;    // Марс: земные дни в году
-const MARS_SOL_EARTH_DAYS = 1.025957;   // Марс: длительность сола в земных сутках
+const LUNAR_CYCLE_MS = 2551443180;      
+const SUN_ROTATION_MS = 2192832000;     
+const VENUS_YEAR_EARTH_DAYS = 224.7;    
+const VENUS_SOL_EARTH_DAYS = 116.75;    
+const MARS_YEAR_EARTH_DAYS = 686.98;    
+const MARS_SOL_EARTH_DAYS = 1.025957;   
 
-/* --- СОСТОЯНИЕ: Переменные синхронизации --- */
-let baseTime = null; // Точка отсчета времени
-let lastFetch = null; // Время последнего получения ответа от сервера
-let userTimezone = "UTC"; // Определенная часовая зона пользователя
+let baseTime = null; 
+let lastFetch = null; 
+let userTimezone = "UTC"; 
 
-/* --- КЭШ: Ссылки на DOM для оптимизации доступа --- */
 const dom = {
     weather: document.getElementById("weatherBlock"),
     timezone: document.getElementById("timezoneLabel"),
     clock: document.getElementById("normalClock"),
     timerLabel: document.getElementById("timerLabel"),
     timer: document.getElementById("countdownTimer"),
-    spaceLenta: document.getElementById("spaceLenta"),
-    liveBox: document.getElementById("liveBox"),
-    colorInput: document.getElementById("colorInput")
+    spaceLenta: document.getElementById("spaceLenta")
 };
 
-/* --- ОБЩЕСТРАНИЧНОЕ: Получение точного времени через API --- */
 async function fetchUTCTime() {
     try {
         const res = await fetch('https://worldtimeapi.org/api/ip');
@@ -261,7 +277,6 @@ async function fetchUTCTime() {
         lastFetch = Date.now();
         userTimezone = data.timezone;
     } catch (err) {
-        // Резервный режим: при ошибке сети используем системные часы
         console.error("Ошибка сети, переход на системное время:", err);
         baseTime = new Date();
         lastFetch = Date.now();
@@ -269,13 +284,10 @@ async function fetchUTCTime() {
     }
 }
 
-/* --- БЛОК ПОГОДЫ: Обновление метеоданных --- */
 async function fetchRealWeather() {
     try {
         const res = await fetch('https://wttr.in/?format=j1');
         const data = await res.json();
-        
-        // Извлекаем актуальные данные из структуры wttr.in
         const current = data.current_condition[0];
         const city = data.nearest_area[0].areaName[0].value;
         const temp = current.temp_C;
@@ -283,7 +295,6 @@ async function fetchRealWeather() {
         const humidity = current.humidity;
         const windMs = (parseFloat(current.windspeedKmph) / 3.6).toFixed(1);
 
-        // Обновляем HTML-содержимое панели погоды
         dom.weather.innerHTML = `
             <div class="weather-title">📍 ПОГОДА (${city})</div>
             <div>• Температура: <b>${temp}°C</b></div>
@@ -292,7 +303,6 @@ async function fetchRealWeather() {
             <div>• Ветер: <span>${windMs} м/с</span></div>
         `;
     } catch (err) {
-        // Ошибка отображается в интерфейсе
         console.error("Не удалось получить погоду:", err);
         dom.weather.innerHTML = `
             <div class="weather-title">📍 МЕТЕОСТАНЦИЯ</div>
@@ -301,27 +311,21 @@ async function fetchRealWeather() {
     }
 }
 
-/* --- ТАЙМЕР: Вспомогательная логика проверки выходных --- */
 function isWeekend(day) {
     return day === 0 || day === 6;
 }
 
-/* --- ЧАСЫ И ТАЙМЕР: Главная логика тикания часов и расчетов --- */
 function updateClocks() {
     if (!baseTime) return;
 
-    // Вычисляем текущее время с учетом сдвига с момента последнего запроса
     const now = new Date(baseTime.getTime() + (Date.now() - lastFetch));
-
     dom.timezone.textContent = `Время [ ${userTimezone} ]`;
 
-    // Форматирование часов, минут и секунд
     const h = String(now.getHours()).padStart(2, '0');
     const m = String(now.getMinutes()).padStart(2, '0');
     const s = String(now.getSeconds()).padStart(2, '0');
     dom.clock.textContent = `${h}:${m}:${s}`;
 
-    /* --- ТАЙМЕР: Логика рабочего графика --- */
     const currentDay = now.getDay();
     const year = now.getFullYear();
     const month = now.getMonth();
@@ -335,18 +339,15 @@ function updateClocks() {
     const isWorkingDay = !isWeekend(currentDay);
     let dynamicColor = "#ff5555"; 
 
-    // Вычисление фазы рабочего дня для изменения цвета
     if (isWorkingDay && now >= startOfWorkToday && now < endOfWorkToday) {
         labelText = "До конца смены:";
         targetTime = endOfWorkToday;
-
         const progress = (now - startOfWorkToday) / (endOfWorkToday - startOfWorkToday);
         const r = Math.floor(255 - (255 * progress));
         const g = Math.floor(85 + (170 * progress));
         const b = Math.floor(85 + (42 * progress));
         dynamicColor = `rgb(${r}, ${g}, ${b})`;
     } else {
-        // Определение следующей цели, если смена не идет
         labelText = "До начала смены:";
         let nextTarget = new Date(year, month, date + 1, 8, 0, 0, 0);
         if (isWorkingDay && now < startOfWorkToday) {
@@ -363,7 +364,6 @@ function updateClocks() {
         dom.timer.style.color = dynamicColor;
     }
 
-    // Расчет разницы времени и обновление DOM
     const diffMs = targetTime - now;
     const diffHours = Math.floor(diffMs / 3600000);
     const diffMinutes = Math.floor((diffMs % 3600000) / 60000);
@@ -372,16 +372,13 @@ function updateClocks() {
     dom.timerLabel.textContent = labelText;
     dom.timer.textContent = `${String(diffHours).padStart(2, '0')}:${String(diffMinutes).padStart(2, '0')}:${String(diffSeconds).padStart(2, '0')}`;
 
-    /* --- КОСМИЧЕСКИЕ МЕТРИКИ: Астрономические вычисления --- */
     const currentMs = now.getTime();
     const totalEarthDays = (currentMs - Date.UTC(1, 0, 1, 0, 0, 0, 0)) / MS_IN_DAY;
-
     const venusYearsTotal = totalEarthDays / VENUS_YEAR_EARTH_DAYS;
     const venusDaysTotal = totalEarthDays / VENUS_SOL_EARTH_DAYS;
     const marsYearsTotal = totalEarthDays / MARS_YEAR_EARTH_DAYS;
     const marsSolsTotal = totalEarthDays / MARS_SOL_EARTH_DAYS;
 
-    // Вычисление фазы луны относительно опорной даты
     const moonCycles = (currentMs - Date.UTC(2000, 0, 6, 18, 14, 0)) / LUNAR_CYCLE_MS;
     const moonAgeDays = (moonCycles % 1) * 29.53059;
     
@@ -399,76 +396,56 @@ function updateClocks() {
 
     const sunRotationsTotal = (currentMs - Date.UTC(1853, 10, 9, 12, 0, 0)) / SUN_ROTATION_MS;
 
-    // Вывод всех данных в бегущую строку (marquee)
     dom.spaceLenta.innerHTML = `🌙 ЛУНА: ${moonPhaseText} (${moonIllumination}%) &nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp; 
-                        🌋 ВЕНЕРА: ${Math.floor(venusDaysTotal) + 1}-ие сутки ${Math.floor(venusYearsTotal) + 1}-го года (день завершен на ${((venusDaysTotal % 1) * 100).toFixed(2)}%) &nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp; 
-                        🚀 МАРС: ${Math.floor(marsSolsTotal) + 1}-ый Сол ${Math.floor(marsYearsTotal) + 1}-го года (завершен на ${((marsSolsTotal % 1) * 100).toFixed(2)}%) &nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp; 
-                        ☀️ СОЛНЦЕ: идет ${Math.floor(sunRotationsTotal) + 1}-ый оборот (цикл выполнен на ${((sunRotationsTotal % 1) * 100).toFixed(2)}%)`;
+                        🌋 ВЕНЕРА: ${Math.floor(venusDaysTotal) + 1}-ие сутки ${Math.floor(venusYearsTotal) + 1}-го года (${((venusDaysTotal % 1) * 100).toFixed(2)}%) &nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp; 
+                        🚀 МАРС: ${Math.floor(marsSolsTotal) + 1}-ый Сол ${Math.floor(marsYearsTotal) + 1}-го года (${((marsSolsTotal % 1) * 100).toFixed(2)}%) &nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp; 
+                        ☀️ СОЛНЦЕ: ${Math.floor(sunRotationsTotal) + 1}-ый оборот (${((sunRotationsTotal % 1) * 100).toFixed(2)}%)`;
 }
 
-/* --- ОБЩЕСТРАНИЧНОЕ: Инициализация системы --- */
 async function init() {
-   
-    // 1. Загрузка данных таблицы OrdoSkipit
     await loadTableData();
-    // 2. Обновление таблицы раз в 60 секунд
     setInterval(loadTableData, 60000);
     
-    // Параллельный запуск критически важных сетевых запросов при загрузке
     await Promise.all([
         fetchUTCTime(),
         fetchRealWeather()
     ]);
     
-    // Привязка логики тестера цвета в обход инлайн-скриптов
-    dom.colorInput.addEventListener("input", (e) => {
-        dom.liveBox.style.backgroundColor = e.target.value;
-    });
-
-// --- БЛОК ОТПРАВКИ ДАННЫХ В ТАБЛИЦУ ---
+    // --- ОТПРАВКА ДАННЫХ В ТАБЛИЦУ ---
     const btnSubmit = document.getElementById("btnSubmit");
     const inputAuthor = document.getElementById("inputAuthor");
     const inputText = document.getElementById("inputText");
     const sendStatus = document.getElementById("sendStatus");
 
     btnSubmit.addEventListener("click", async () => {
-        // Проверяем, чтобы поля не были пустыми
         if (!inputAuthor.value.trim() || !inputText.value.trim()) {
             sendStatus.textContent = "Ошибка: Заполните оба поля!";
             sendStatus.style.color = "#ff5555";
             return;
         }
 
-        // Блокируем кнопку на время отправки, чтобы избежать дублей
         btnSubmit.disabled = true;
         btnSubmit.style.background = "#555";
         sendStatus.textContent = "Отправка пакета данных...";
         sendStatus.style.color = "#aaa";
 
         try {
-            // Формируем параметры для отправки формата URL-encoded (наиболее стабильный для GAS)
             const formData = new URLSearchParams();
             formData.append("author", inputAuthor.value.trim());
             formData.append("text", inputText.value.trim());
 
-            // Делаем POST-запрос к Google Apps Script
-            const response = await fetch(SCRIPT_URL, {
+            await fetch(SCRIPT_URL, {
                 method: "POST",
-                mode: "no-cors", // Используем no-cors, так как Google делает редиректы, которые браузер считает небезопасными
+                mode: "no-cors", 
                 headers: {
                     "Content-Type": "application/x-www-form-urlencoded"
                 },
                 body: formData.toString()
             });
 
-            // Так как режим no-cors не возвращает ответ, мы предполагаем успех, если нет ошибки сети
             sendStatus.textContent = "Данные успешно переданы в OrdoSkipit!";
             sendStatus.style.color = "#00ffaa";
-
-            // Очищаем поле текста, а автора оставляем для удобства
             inputText.value = "";
-
-            // Сразу же принудительно обновляем таблицу, чтобы увидеть свою запись (через 1.5 секунды, чтобы Google успел обработать)
             setTimeout(loadTableData, 1500);
 
         } catch (error) {
@@ -476,20 +453,17 @@ async function init() {
             sendStatus.textContent = `Критический сбой: ${error.message}`;
             sendStatus.style.color = "#ff5555";
         } finally {
-            // Возвращаем кнопку в рабочее состояние
             btnSubmit.disabled = false;
             btnSubmit.style.background = "#00e5ff";
         }
     });
     
-    // Запуск таймеров обновления данных
     updateClocks();
-    setInterval(updateClocks, 1000);        // Обновление цифр каждую секунду
-    setInterval(fetchUTCTime, 300000);      // Синхронизация времени каждые 5 минут
-    setInterval(fetchRealWeather, 1800000); // Обновление погоды каждые 30 минут
+    setInterval(updateClocks, 1000);        
+    setInterval(fetchUTCTime, 300000);      
+    setInterval(fetchRealWeather, 1800000); 
 }
 
-// Запуск всего процесса
 init();
 </script>
 </body>
