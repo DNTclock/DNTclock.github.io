@@ -10,10 +10,25 @@
 </head>
 <body>
     <div class="content" id="wishesContainer">Загрузка данных...</div>
-
+<div style="margin-top: 20px; padding: 20px; border: 1px solid #444;">
+    <input type="text" id="authorInput" placeholder="Имя" style="background:#222; color:#fff; border:none; padding:5px;">
+    <input type="text" id="textInput" placeholder="Сообщение" style="background:#222; color:#fff; border:none; padding:5px; width: 300px;">
+    <button onclick="sendData()" style="background:#00e5ff; border:none; padding:5px 15px; cursor:pointer;">ОТПРАВИТЬ В БАЗУ</button>
+</div>
     <script>
         const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz1OQpFfjHblcr4sm5g_ELGk1SwMp000IEnv8W04M-78DJFJEjVI3NXHUo70uOHfn522g/exec';
-
+async function sendData() {
+    const author = document.getElementById('authorInput').value;
+    const text = document.getElementById('textInput').value;
+    
+    await fetch(SCRIPT_URL, {
+        method: 'POST',
+        body: JSON.stringify({author, text})
+    });
+    
+    loadTableData(); // Обновит список после отправки
+}
+        
         async function loadData() {
             try {
                 const response = await fetch(SCRIPT_URL);
