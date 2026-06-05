@@ -65,7 +65,7 @@ body {
     margin-bottom: 2px;
 }
 .clock-digits, .timer-digits {
-    font-size: 32px;
+    font-size: 24px;
     font-weight: bold;
 }
 .clock-digits { color: #fff; }
@@ -218,7 +218,7 @@ body {
 <div class="input-panel-bottom">
     <span style="color: #00e5ff; font-size: 12px; display: block; margin-bottom: 5px;">[ ВВОД НОВЫХ ДАННЫХ В ORDOSKIPIT ]</span>
     <div class="flex-input-row">
-        <input type="text" id="inputAuthor" placeholder="Автор" style="background: #222; color: #fff; border: 1px solid #444; padding: 8px; border-radius: 4px; font-family: inherit; width: 25%;">
+        <input type="text" id="inputAuthor" placeholder="Автор (имя сохранится)" style="background: #222; color: #fff; border: 1px solid #444; padding: 8px; border-radius: 4px; font-family: inherit; width: 25%;">
         <input type="text" id="inputText" placeholder="Введите текст сообщения..." style="background: #222; color: #fff; border: 1px solid #444; padding: 8px; border-radius: 4px; font-family: inherit; flex-grow: 1;">
         <button id="btnSubmit" style="background: #00e5ff; color: #111; border: none; padding: 8px 15px; border-radius: 4px; font-family: inherit; font-weight: bold; cursor: pointer; transition: background 0.2s;">ОТПРАВИТЬ</button>
     </div>
@@ -417,6 +417,11 @@ async function init() {
     const inputText = document.getElementById("inputText");
     const sendStatus = document.getElementById("sendStatus");
 
+    // ПРОВЕРКА КЭША: Если имя уже сохранялось в браузере, подтягиваем его
+    if (localStorage.getItem("ordo_author")) {
+        inputAuthor.value = localStorage.getItem("ordo_author");
+    }
+    
     btnSubmit.addEventListener("click", async () => {
         if (!inputAuthor.value.trim() || !inputText.value.trim()) {
             sendStatus.textContent = "Ошибка: Заполните оба поля!";
@@ -445,6 +450,10 @@ async function init() {
 
             sendStatus.textContent = "Данные успешно переданы в OrdoSkipit!";
             sendStatus.style.color = "#00ffaa";
+
+            // ЗАПОМИНАЕМ АВТОРА: Сохраняем имя в память браузера
+            localStorage.setItem("ordo_author", inputAuthor.value.trim());
+            
             inputText.value = "";
             setTimeout(loadTableData, 1500);
 
