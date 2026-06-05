@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>ОРДО-ТЕРМИНАЛ // ПОЛНЫЙ ФУНКЦИОНАЛ</title>
+    <title>ОРДО-ТЕРМИНАЛ // FULL VERSION</title>
     <style>
         body { background: #111; color: #eee; font-family: Consolas, monospace; margin: 0; padding: 0; height: 100vh; overflow: hidden; }
         .weather-static-panel { position: fixed; left: 20px; top: 20px; text-align: left; background: rgba(26, 26, 36, 0.7); padding: 15px; border-radius: 8px; border-left: 4px solid #00e5ff; font-size: 13px; line-height: 1.6; max-width: 300px; z-index: 1000; }
@@ -10,15 +10,17 @@
         .control-panel-corner { position: fixed; right: 30px; top: 20px; background: rgba(20, 20, 20, 0.8); padding: 12px 20px; border-radius: 8px; border: 1px solid #222; z-index: 999; text-align: right; }
         .flex-time-row { display: flex; align-items: baseline; gap: 25px; }
         .clock-digits, .timer-digits { font-size: 32px; font-weight: bold; }
-        .main-content-area { position: absolute; top: 180px; left: 50%; transform: translateX(-50%); width: 70%; max-height: 40vh; overflow-y: auto; text-align: left; color: #eee; padding: 20px; border: 1px solid #333; border-radius: 8px; background: rgba(0,0,0,0.3); }
+        .main-content-area { position: absolute; top: 180px; left: 50%; transform: translateX(-50%); width: 70%; max-height: 40vh; overflow-y: auto; text-align: left; border: 1px solid #333; padding: 20px; background: rgba(0,0,0,0.3); }
         .input-panel { position: fixed; top: 120px; left: 50%; transform: translateX(-50%); z-index: 999; }
         .space-marquee { position: fixed; left: 0; bottom: 0; width: 100%; background: #000; height: 40px; line-height: 40px; color: #00ffaa; border-top: 1px solid #333; }
-        .tester-container { position: fixed; right: 20px; bottom: 60px; background: rgba(30,30,30,0.8); padding: 15px; border-radius: 8px; border: 1px solid #444; }
     </style>
 </head>
 <body>
 
-<div class="weather-static-panel" id="weatherBlock"><div class="weather-title">📡 МЕТЕОСТАНЦИЯ</div><div>Инициализация...</div></div>
+<div class="weather-static-panel" id="weatherBlock">
+    <div class="weather-title">📡 МЕТЕОСТАНЦИЯ</div>
+    <div id="weatherContent">Инициализация...</div>
+</div>
 
 <div class="input-panel">
     <input type="text" id="authorInput" placeholder="Имя" style="background:#222; color:#fff; border:none; padding:5px;">
@@ -39,25 +41,21 @@
     </div>
 </div>
 
-<div class="main-content-area" id="wishesContainer"></div>
+<div class="main-content-area" id="wishesContainer">Загрузка данных...</div>
 
-<div class="tester-container">
-    <span id="liveBox" style="display:inline-block; width:20px; height:20px; background:#888;"></span>
-    <input type="text" id="colorInput" placeholder="#00ffff" style="background:#222; color:#fff; border:1px solid #555;">
-</div>
-
-<marquee class="space-marquee" id="spaceMarquee"><span id="spaceLenta">Система инициализирована...</span></marquee>
+<marquee class="space-marquee" id="spaceMarquee">
+    <span id="spaceLenta">Система активна...</span>
+</marquee>
 
 <script>
-    const SCRIPT_URL = 'ВСТАВЬ_СЮДА_URL_ТВОЕГО_APPS_SCRIPT'; 
+    const SCRIPT_URL = 'ВСТАВЬ_ССЫЛКУ_СЮДА';
 
-    // --- БАЗА ДАННЫХ ---
+    // --- БАЗА ---
     async function loadTableData() {
-        const container = document.getElementById('wishesContainer');
         try {
             const res = await fetch(SCRIPT_URL);
             const data = await res.json();
-            container.innerHTML = data.map(r => `<div><b>${r.author}:</b> ${r.text}</div>`).join('');
+            document.getElementById('wishesContainer').innerHTML = data.map(r => `<div><b>${r.author}:</b> ${r.text}</div>`).join('');
         } catch(e) { console.error(e); }
     }
 
@@ -68,35 +66,28 @@
         loadTableData();
     }
 
-    // --- КОСМОС И ВРЕМЯ (ТВОЙ ИСХОДНЫЙ КОД) ---
+    // --- КОСМИЧЕСКИЕ РАСЧЕТЫ ---
     const MS_IN_DAY = 86400000;
-    const LUNAR_CYCLE_MS = 2551443180;
-    const SUN_ROTATION_MS = 2192832000;
-    const VENUS_YEAR_EARTH_DAYS = 224.7;
     const VENUS_SOL_EARTH_DAYS = 116.75;
-    const MARS_YEAR_EARTH_DAYS = 686.98;
     const MARS_SOL_EARTH_DAYS = 1.025957;
 
     function updateClocks() {
         const now = new Date();
         document.getElementById("normalClock").textContent = now.toLocaleTimeString();
         
-        // Расчет циклов
-        const currentMs = now.getTime();
-        const totalEarthDays = (currentMs - Date.UTC(1, 0, 1)) / MS_IN_DAY;
-        const venusDays = totalEarthDays / VENUS_SOL_EARTH_DAYS;
-        const marsSols = totalEarthDays / MARS_SOL_EARTH_DAYS;
-        
-        document.getElementById("spaceLenta").innerHTML = `ВЕНЕРА: ${Math.floor(venusDays)} суток | МАРС: ${Math.floor(marsSols)} Солов`;
+        // Таймер смены (градиент)
+        const progress = (now.getHours() - 8) / 9;
+        const r = Math.floor(255 - (255 * progress));
+        document.getElementById("countdownTimer").style.color = `rgb(${r}, 170, 85)`;
+
+        // Космическая лента
+        const totalDays = (now.getTime() - Date.UTC(1,0,1)) / MS_IN_DAY;
+        document.getElementById("spaceLenta").innerHTML = 
+            `ВЕНЕРА: ${Math.floor(totalDays / VENUS_SOL_EARTH_DAYS)} сут | МАРС: ${Math.floor(totalDays / MARS_SOL_EARTH_DAYS)} сол`;
     }
 
-    async function init() {
-        await loadTableData();
-        setInterval(updateClocks, 1000);
-        setInterval(loadTableData, 60000); // Обновление базы раз в минуту
-    }
-
-    init();
+    setInterval(updateClocks, 1000);
+    loadTableData();
 </script>
 </body>
 </html>
