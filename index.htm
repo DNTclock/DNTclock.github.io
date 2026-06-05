@@ -2,29 +2,29 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<title>OrdoSkipit // С Днём Рождения, Алёна!</title>
+<title>Космический пульт управления</title>
 <style>
 /* БАЗОВЫЕ НАСТРОЙКИ ЭКРАНА */
 body {
-    background: #0d0d13;
+    background: #111;
     color: #eee;
     font-family: Consolas, monospace;
     margin: 0;
     padding: 0;
     height: 100vh;
-    overflow-y: auto;
+    overflow: hidden;
 }
 
-/* СТАТИЧНЫЙ БЛОК ПОГОДЫ */
+/* СТАТИЧНЫЙ БЛОК ПОГОДЫ В ЛЕВОМ ВЕРХНЕМ УГЛУ */
 .weather-static-panel {
     position: fixed;
     left: 20px;
     top: 20px;
     text-align: left;
-    background: rgba(26, 26, 36, 0.85);
+    background: rgba(26, 26, 36, 0.7);
     padding: 15px;
     border-radius: 8px;
-    border-left: 4px solid #ff007f;
+    border-left: 4px solid #00e5ff;
     font-size: 13px;
     line-height: 1.6;
     max-width: 300px;
@@ -32,21 +32,21 @@ body {
 }
 
 .weather-title {
-    color: #ff007f;
+    color: #00e5ff;
     font-weight: bold;
     margin-bottom: 5px;
     font-size: 14px;
 }
 
-/* ЕДИНАЯ СТРОКА ВРЕМЕНИ И ТАЙМЕРА */
+/* ЕДИНАЯ СТРОКА ВРЕМЕНИ И ТАЙМЕРА В ПРАВОМ ВЕРХНЕМ УГЛУ */
 .control-panel-corner {
     position: fixed;
     right: 30px;
     top: 20px;
-    background: rgba(20, 20, 20, 0.85);
+    background: rgba(20, 20, 20, 0.8);
     padding: 12px 20px;
     border-radius: 8px;
-    border: 1px solid #333;
+    border: 1px solid #222;
     z-index: 999;
     text-align: right;
 }
@@ -68,6 +68,10 @@ body {
     margin-bottom: 2px;
 }
 
+.timezone-sub {
+    letter-spacing: 0.5px;
+}
+
 .clock-digits, .timer-digits {
     font-size: 32px;
     font-weight: bold;
@@ -77,94 +81,27 @@ body {
     color: #fff;
 }
 
-/* ПРАЗДНИЧНЫЙ ЦЕНТРАЛЬНЫЙ БЛОК */
+.timer-digits {
+    transition: color 0.5s ease;
+}
+
+/* ЦЕНТРАЛЬНАЯ ЗОНА ДЛЯ ОСНОВНОГО КОНТЕНТА (ЗАГЛУШКА) */
 .main-content-area {
-    margin: 120px auto 60px auto;
-    width: 65%;
-    max-width: 900px;
+    position: absolute;
+    top: 150px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80%;
     text-align: center;
-    background: rgba(18, 18, 24, 0.8);
-    border: 1px solid #ff007f;
-    box-shadow: 0 0 20px rgba(255, 0, 127, 0.2);
-    padding: 40px;
-    border-radius: 12px;
-}
-
-.birthday-title {
-    font-size: 28px;
-    color: #00ffaa;
-    text-transform: uppercase;
-    letter-spacing: 3px;
-    margin-bottom: 10px;
-    text-shadow: 0 0 10px rgba(0, 255, 170, 0.3);
-}
-
-.birthday-subtitle {
-    color: #ffaa00;
-    font-size: 14px;
-    margin-bottom: 30px;
-}
-
-/* ФОТОГАЛЕРЕЯ ДЛЯ ALYONA */
-.photo-gallery {
-    display: flex;
-    justify-content: center;
-    gap: 20px;
-    margin-bottom: 30px;
-    flex-wrap: wrap;
-}
-
-.birthday-photo {
-    width: 280px;
-    height: 380px;
-    object-fit: cover;
-    border: 2px solid #333;
+    color: #444;
+    font-size: 16px;
+    border: 1px dashed #222;
+    padding: 60px;
     border-radius: 8px;
-    transition: all 0.3s ease;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+    letter-spacing: 2px;
 }
 
-.birthday-photo:hover {
-    border-color: #ff007f;
-    transform: scale(1.02);
-    box-shadow: 0 0 15px rgba(255, 0, 127, 0.4);
-}
-
-/* ТЕКСТ ПОЗДРАВЛЕНИЯ */
-.congrats-text {
-    font-size: 15px;
-    line-height: 1.8;
-    color: #ddd;
-    text-align: left;
-    max-width: 650px;
-    margin: 0 auto 40px auto;
-    border-left: 2px solid #00ffaa;
-    padding-left: 20px;
-}
-
-/* КНОПКИ СВЯЗИ */
-.contact-container {
-    margin-top: 30px;
-    display: flex;
-    justify-content: center;
-    gap: 20px;
-}
-
-.contact-btn {
-    padding: 12px 25px;
-    border-radius: 6px;
-    font-weight: bold;
-    text-decoration: none;
-    color: white;
-    font-size: 14px;
-    transition: transform 0.2s;
-}
-
-.contact-btn:hover { transform: scale(1.05); }
-.tg-btn { background: #0088cc; }
-.wa-btn { background: #25d366; }
-
-/* КОСМИЧЕСКАЯ БЕГУЩАЯ СТРОКА */
+/* КОСМИЧЕСКАЯ БЕГУЩАЯ СТРОКА ВНИЗУ */
 .space-marquee {
     position: fixed;
     left: 0;
@@ -173,17 +110,49 @@ body {
     background: #000;
     height: 40px;
     line-height: 40px;
-    color: #ff007f;
+    color: #00ffaa;
     font-size: 14px;
     border-top: 1px solid #333;
-    z-index: 1000;
+}
+
+/* ТЕСТЕР ЦВЕТА */
+.tester-container {
+    position: fixed;
+    right: 20px;
+    bottom: 50px;
+    text-align: left;
+    background: rgba(30, 30, 30, 0.8);
+    padding: 15px;
+    border-radius: 8px;
+    border: 1px solid #444;
+}
+
+.live-box {
+    display: inline-block;
+    width: 30px;
+    height: 30px;
+    background-color: #888;
+    border-radius: 4px;
+    vertical-align: middle;
+    margin-right: 10px;
+}
+
+.color-input {
+    width: 120px;
+    padding: 5px;
+    background: #222;
+    color: #fff;
+    border: 1px solid #555;
+    border-radius: 4px;
+    font-family: inherit;
+    vertical-align: middle;
 }
 </style>
 </head>
 <body>
 
 <div class="weather-static-panel" id="weatherBlock">
-    <div class="weather-title">📡 ORDOSKIPIT // МЕТЕО</div>
+    <div class="weather-title">📡 МЕТЕОСТАНЦИЯ</div>
     <div style="color: #aaa;">Связь со спутником...</div>
 </div>
 
@@ -193,6 +162,7 @@ body {
             <span id="timezoneLabel" class="timezone-sub">Время [ UTC ]</span>
             <div id="normalClock" class="clock-digits">--:--:--</div>
         </div>
+        
         <div class="timer-block">
             <span id="timerLabel" class="timer-sub">Загрузка...</span>
             <div id="countdownTimer" class="timer-digits">--:--:--</div>
@@ -201,23 +171,13 @@ body {
 </div>
 
 <div class="main-content-area">
-    <div class="birthday-title">✨ С Днём Рождения, Алёна! ✨</div>
-    <div class="birthday-subtitle">Специальный режим терминала OrdoSkipit // Инициализация праздничного протокола</div>
+    [ В РАЗРАБОТКЕ ]
+</div>
 
-    <div class="photo-gallery">
-        <img src="Alyona.jfif" alt="Алёна 1" class="birthday-photo">
-        <img src="Alyona1.jfif" alt="Алёна 2" class="birthday-photo">
-    </div>
-
-    <div class="congrats-text">
-        Дорогая Алёна! Пусть этот день принесет тебе море крутых эмоций, ярких моментов и исполнения самых амбициозных планов. Иди вперед, развивайся, улыбайся и никогда не сомневайся в своих силах. Пусть твоя личная "жизненная программа" работает без багов и сбоев! С праздником! 🚀🎉
-    </div>
-
-    <!-- КНОПКИ СВЯЗИ -->
-    <div class="contact-container">
-        <a href="https://t.me/Akylaiiii" target="_blank" class="contact-btn tg-btn">TELEGRAM</a>
-        <a href="https://wa.me/7778139083" target="_blank" class="contact-btn wa-btn">WHATSAPP</a>
-    </div>
+<div class="tester-container">
+    <div style="font-size: 12px; color: #888; margin-bottom: 5px;">Проба цвета на ходу:</div>
+    <span id="liveBox" class="live-box"></span>
+    <input type="text" id="colorInput" class="color-input" placeholder="#00ffff">
 </div>
 
 <marquee class="space-marquee" scrollamount="4" id="spaceMarquee">
@@ -225,25 +185,30 @@ body {
 </marquee>
 
 <script>
+// КОНСТАНТЫ И НАСТРОЙКИ (Астрономические и календарные данные)
 const MS_IN_DAY = 86400000;
-const LUNAR_CYCLE_MS = 2551443180;
-const SUN_ROTATION_MS = 2192832000;
+const LUNAR_CYCLE_MS = 2551443180;      // Средняя продолжительность синодического месяца Луны
+const SUN_ROTATION_MS = 2192832000;     // Кэррингтоновский оборот Солнца в мс
 const VENUS_YEAR_EARTH_DAYS = 224.7;
 const VENUS_SOL_EARTH_DAYS = 116.75;
 const MARS_YEAR_EARTH_DAYS = 686.98;
 const MARS_SOL_EARTH_DAYS = 1.025957;
 
+// Глобальное состояние временной синхронизации
 let baseTime = null;
 let lastFetch = null;
 let userTimezone = "UTC";
 
+// Кэш DOM-элементов для уменьшения количества поисков по документу
 const dom = {
     weather: document.getElementById("weatherBlock"),
     timezone: document.getElementById("timezoneLabel"),
     clock: document.getElementById("normalClock"),
     timerLabel: document.getElementById("timerLabel"),
     timer: document.getElementById("countdownTimer"),
-    spaceLenta: document.getElementById("spaceLenta")
+    spaceLenta: document.getElementById("spaceLenta"),
+    liveBox: document.getElementById("liveBox"),
+    colorInput: document.getElementById("colorInput")
 };
 
 async function fetchUTCTime() {
@@ -254,6 +219,7 @@ async function fetchUTCTime() {
         lastFetch = Date.now();
         userTimezone = data.timezone;
     } catch (err) {
+        console.error("Ошибка сети, переход на системное время:", err);
         baseTime = new Date();
         lastFetch = Date.now();
         userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
@@ -264,51 +230,147 @@ async function fetchRealWeather() {
     try {
         const res = await fetch('https://wttr.in/?format=j1');
         const data = await res.json();
+        
         const current = data.current_condition[0];
         const city = data.nearest_area[0].areaName[0].value;
         const temp = current.temp_C;
         const desc = current.lang_ru ? current.lang_ru[0].value : current.weatherDesc[0].value;
-        
+        const humidity = current.humidity;
+        const windMs = (parseFloat(current.windspeedKmph) / 3.6).toFixed(1);
+
         dom.weather.innerHTML = `
             <div class="weather-title">📍 ПОГОДА (${city})</div>
-            <div>• Праздничная температура: <b>${temp}°C</b></div>
-            <div>• На улице: <span>${desc}</span></div>
-            <div style="margin-top:10px; color:#ff007f; font-weight:bold;">🎉 СЕМЕЙНЫЙ ПРАЗДНИК 🎉</div>
+            <div>• Температура: <b>${temp}°C</b></div>
+            <div>• Состояние: <span>${desc}</span></div>
+            <div>• Влажность: <span>${humidity}%</span></div>
+            <div>• Ветер: <span>${windMs} м/с</span></div>
         `;
     } catch (err) {
+        console.error("Не удалось получить погоду:", err);
         dom.weather.innerHTML = `
-            <div class="weather-title">📍 ORDOSKIPIT // МЕТЕО</div>
-            <div style="color: #ff5555;">Автономный праздничный режим</div>
+            <div class="weather-title">📍 МЕТЕОСТАНЦИЯ</div>
+            <div style="color: #ff5555;">Автономный режим (ошибка сети)</div>
         `;
     }
 }
 
+// Проверка на выходной день
+function isWeekend(day) {
+    return day === 0 || day === 6;
+}
+
 function updateClocks() {
     if (!baseTime) return;
+
     const now = new Date(baseTime.getTime() + (Date.now() - lastFetch));
+
     dom.timezone.textContent = `Время [ ${userTimezone} ]`;
-    
+
+    // Форматирование земных часов
     const h = String(now.getHours()).padStart(2, '0');
     const m = String(now.getMinutes()).padStart(2, '0');
     const s = String(now.getSeconds()).padStart(2, '0');
     dom.clock.textContent = `${h}:${m}:${s}`;
 
-    dom.timerLabel.textContent = "ПРАЗДНИЧНЫЙ ТАЙМЕР:";
-    dom.timer.style.color = "#ff007f";
-    dom.timer.textContent = "DAY:2026";
+    // ===== Расчет таймера рабочего графика =====
+    const currentDay = now.getDay();
+    const year = now.getFullYear();
+    const month = now.getMonth();
+    const date = now.getDate();
 
+    const startOfWorkToday = new Date(year, month, date, 8, 0, 0, 0);
+    const endOfWorkToday = new Date(year, month, date, currentDay === 5 ? 16 : 17, currentDay === 5 ? 0 : 15, 0, 0);
+
+    let labelText = "";
+    let targetTime = null;
+    const isWorkingDay = !isWeekend(currentDay);
+    let dynamicColor = "#ff5555"; 
+
+    if (isWorkingDay && now >= startOfWorkToday && now < endOfWorkToday) {
+        labelText = "До конца смены:";
+        targetTime = endOfWorkToday;
+
+        const progress = (now - startOfWorkToday) / (endOfWorkToday - startOfWorkToday);
+
+        // Вычисление градиента
+        const r = Math.floor(255 - (255 * progress));
+        const g = Math.floor(85 + (170 * progress));
+        const b = Math.floor(85 + (42 * progress));
+        dynamicColor = `rgb(${r}, ${g}, ${b})`;
+    } else {
+        labelText = "До начала смены:";
+        
+        let nextTarget = new Date(year, month, date + 1, 8, 0, 0, 0);
+        if (isWorkingDay && now < startOfWorkToday) {
+            nextTarget = startOfWorkToday;
+        } else {
+            while (isWeekend(nextTarget.getDay())) {
+                nextTarget.setDate(nextTarget.getDate() + 1);
+            }
+        }
+        targetTime = nextTarget;
+    }
+
+    if (dom.timer.style.color !== dynamicColor) {
+        dom.timer.style.color = dynamicColor;
+    }
+
+    const diffMs = targetTime - now;
+    const diffHours = Math.floor(diffMs / 3600000);
+    const diffMinutes = Math.floor((diffMs % 3600000) / 60000);
+    const diffSeconds = Math.floor((diffMs % 60000) / 1000);
+
+    dom.timerLabel.textContent = labelText;
+    dom.timer.textContent = `${String(diffHours).padStart(2, '0')}:${String(diffMinutes).padStart(2, '0')}:${String(diffSeconds).padStart(2, '0')}`;
+
+    // ===== Космические метрики =====
     const currentMs = now.getTime();
     const totalEarthDays = (currentMs - Date.UTC(1, 0, 1, 0, 0, 0, 0)) / MS_IN_DAY;
+
+    const venusYearsTotal = totalEarthDays / VENUS_YEAR_EARTH_DAYS;
     const venusDaysTotal = totalEarthDays / VENUS_SOL_EARTH_DAYS;
+    const marsYearsTotal = totalEarthDays / MARS_YEAR_EARTH_DAYS;
     const marsSolsTotal = totalEarthDays / MARS_SOL_EARTH_DAYS;
+
+    const moonCycles = (currentMs - Date.UTC(2000, 0, 6, 18, 14, 0)) / LUNAR_CYCLE_MS;
+    const moonAgeDays = (moonCycles % 1) * 29.53059;
     
-    dom.spaceLenta.innerHTML = `🎉 СЕГОДНЯ ДЕНЬ РОЖДЕНИЯ АЛЁНЫ! &nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp; 🪐 МАРСИАНСКИЙ КАЛЕНДАРЬ: идет ${Math.floor(marsSolsTotal) + 1}-й Сол &nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp; 🌋 ВЕНЕРА: ${Math.floor(venusDaysTotal) + 1}-ые сутки &nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp; 💝 ОРДОСКИПИТ ПРИВЕТСТВУЕТ ИМЕНИННИЦУ!`;
+    let moonPhaseText = "";
+    let moonIllumination = 0;
+    if (moonAgeDays < 14.765) {
+        moonPhaseText = "Растущая";
+        moonIllumination = ((moonAgeDays / 14.765) * 100).toFixed(1);
+    } else {
+        moonPhaseText = "Убывающая";
+        moonIllumination = (((29.53059 - moonAgeDays) / 14.765) * 100).toFixed(1);
+    }
+    if (moonAgeDays < 0.5 || moonAgeDays > 29.0) { moonPhaseText = "Новолуние"; moonIllumination = "0"; }
+    else if (Math.abs(moonAgeDays - 14.76) < 0.5) { moonPhaseText = "Полнолуние"; moonIllumination = "100"; }
+
+    const sunRotationsTotal = (currentMs - Date.UTC(1853, 10, 9, 12, 0, 0)) / SUN_ROTATION_MS;
+
+    dom.spaceLenta.innerHTML = `🌙 ЛУНА: ${moonPhaseText} (${moonIllumination}%) &nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp; 
+                       🌋 ВЕНЕРА: ${Math.floor(venusDaysTotal) + 1}-ие сутки ${Math.floor(venusYearsTotal) + 1}-го года (день завершен на ${((venusDaysTotal % 1) * 100).toFixed(2)}%) &nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp; 
+                       🚀 МАРС: ${Math.floor(marsSolsTotal) + 1}-ый Сол ${Math.floor(marsYearsTotal) + 1}-го года (завершен на ${((marsSolsTotal % 1) * 100).toFixed(2)}%) &nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp; 
+                       ☀️ СОЛНЦЕ: идет ${Math.floor(sunRotationsTotal) + 1}-ый оборот (цикл выполнен на ${((sunRotationsTotal % 1) * 100).toFixed(2)}%)`;
 }
 
 async function init() {
-    await Promise.all([fetchUTCTime(), fetchRealWeather()]);
+    // Параллельный запуск критически важных сетевых запросов
+    await Promise.all([
+        fetchUTCTime(),
+        fetchRealWeather()
+    ]);
+    
+    // Привязка логики тестера цвета в обход инлайн-скриптов
+    dom.colorInput.addEventListener("input", (e) => {
+        dom.liveBox.style.backgroundColor = e.target.value;
+    });
+
     updateClocks();
-    setInterval(updateClocks, 1000);
+    setInterval(updateClocks, 1000);        // Оптимальный интервал раз в секунду
+    setInterval(fetchUTCTime, 300000);       // Синхронизация времени каждые 5 минут
+    setInterval(fetchRealWeather, 1800000);   // Обновление сводки погоды каждые 30 минут
 }
 
 init();
