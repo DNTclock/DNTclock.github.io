@@ -17,20 +17,40 @@ body {
 }
 
 /* --- БЛОК ПОГОДЫ --- */
+
 .weather-static-panel {
     position: fixed;
     left: 20px;
     top: 20px;
     text-align: left;
     background: rgba(26, 26, 36, 0.7);
-    padding: 15px;
+    padding: 12px 15px;
     border-radius: 8px;
     border-left: 4px solid #00e5ff;
     font-size: 13px;
     line-height: 1.6;
     max-width: 300px;
     z-index: 1000;
+    cursor: pointer; /* Показываем, что блок кликабельный */
+    user-select: none;
 }
+
+/* Контейнер для скрытых деталей погоды */
+.weather-details {
+    overflow: hidden;
+    max-height: 0; /* По умолчанию всё скрыто */
+    transition: max-height 0.3s ease-out, margin-top 0.3s ease;
+    opacity: 0;
+    transition: all 0.3s ease-in-out;
+}
+
+/* Класс, который JS будет вешать при разворачивании */
+.weather-details.expanded {
+    max-height: 100px; /* Высота с запасом для трех строк */
+    margin-top: 8px;
+    opacity: 1;
+}
+
 .weather-title {
     color: #00e5ff;
     font-weight: bold;
@@ -447,12 +467,15 @@ async function fetchRealWeather() {
         const windMs = (parseFloat(current.windspeedKmph) / 3.6).toFixed(1);
 
         dom.weather.innerHTML = `
-            <div class="weather-title">📍 ПОГОДА (${city})</div>
+            <div class="weather-title">📍 ПОГОДА (${city}) <span style="font-size:11px; color:#666; float:right;">▼</span></div>
             <div>• Температура: <b>${temp}°C</b></div>
-            <div>• Состояние: <span>${desc}</span></div>
-            <div>• Влажность: <span>${humidity}%</span></div>
-            <div>• Ветер: <span>${windMs} м/с</span></div>
+            <div class="weather-details" id="weatherDetails">
+                <div>• Состояние: <span>${desc}</span></div>
+                <div>• Влажность: <span>${humidity}%</span></div>
+                <div>• Ветер: <span>${windMs} м/с</span></div>
+            </div>
         `;
+		
     } catch (err) {
         console.error("Не удалось получить погоду:", err);
         dom.weather.innerHTML = `
@@ -740,7 +763,20 @@ async function init() {
     });
 	
 	
-	
+	// --- ИНТЕРАКТИВНАЯ ПОГОДА (СВЕРНУТЬ/РАЗВЕРНУТЬ) ---
+    const weatherBlock = document.getElementById("weatherBlock");
+    weatherBlock.addEventListener("click", () => {
+        const details = document.getElementById("weatherDetails");
+        if (details) {
+            details.classList.toggle("expanded");
+            
+            // Меняем стрелочку в заголовке для красоты
+            const arrow = weatherBlock.querySelector(".weather-title span");
+            if (arrow) {
+                arrow.textContent = details.classList.contains("expanded") ? "▲" : "▼";
+            }
+        }
+    });
 	updateClocks();
     setInterval(updateClocks, 1000);        
     setInterval(fetchUTCTime, 300000);      
