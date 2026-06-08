@@ -189,6 +189,85 @@ body {
         padding: 10px;
     }
 }
+
+
+/* --- МОДАЛЬНОЕ ОКНО НАСТРОЕК ТАЙМЕРА --- */
+.modal-overlay {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.85);
+    display: none; /* По умолчанию скрыто */
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+}
+.modal-window {
+    background: #15151c;
+    border: 1px solid #00e5ff;
+    border-radius: 8px;
+    padding: 20px;
+    width: 90%;
+    max-width: 450px;
+    box-shadow: 0 0 20px rgba(0, 229, 255, 0.2);
+}
+.modal-header {
+    color: #00e5ff;
+    font-size: 14px;
+    font-weight: bold;
+    margin-bottom: 15px;
+    border-bottom: 1px dashed #333;
+    padding-bottom: 8px;
+    text-align: center;
+}
+.schedule-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    font-size: 13px;
+}
+.day-label {
+    width: 100px;
+    color: #aaa;
+}
+.time-inputs {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+.time-field {
+    width: 55px;
+    background: #222;
+    color: #fff;
+    border: 1px solid #444;
+    padding: 5px;
+    border-radius: 4px;
+    text-align: center;
+    font-family: inherit;
+}
+.time-field:disabled {
+    background: #111;
+    color: #444;
+    border-color: #222;
+}
+.modal-buttons {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+}
+.modal-btn {
+    flex: 1;
+    padding: 10px;
+    border-radius: 4px;
+    font-family: inherit;
+    font-weight: bold;
+    cursor: pointer;
+    border: none;
+}
+.btn-save { background: #00e5ff; color: #111; }
+.btn-cancel { background: #333; color: #ccc; }
+
+
 </style>
 </head>
 <body>
@@ -228,6 +307,78 @@ body {
 <marquee class="space-marquee" scrollamount="4" id="spaceMarquee">
     <span id="spaceLenta">Загрузка межпланетных календарей...</span>
 </marquee>
+
+
+<div class="modal-overlay" id="timerModal">
+    <div class="modal-window">
+        <div class="modal-header">[ НАСТРОЙКА РАБОЧИХ СМЕН ORDOSKIPIT ]</div>
+        
+        <div id="scheduleContainer">
+            <div class="schedule-row" data-day="1">
+                <label><input type="checkbox" class="day-checkbox"> <span class="day-label">Понедельник</span></label>
+                <div class="time-inputs">
+                    <input type="text" class="time-field start-time" placeholder="08:00" maxlength="5">
+                    <span style="color:#444">-</span>
+                    <input type="text" class="time-field end-time" placeholder="17:00" maxlength="5">
+                </div>
+            </div>
+            <div class="schedule-row" data-day="2">
+                <label><input type="checkbox" class="day-checkbox"> <span class="day-label">Вторник</span></label>
+                <div class="time-inputs">
+                    <input type="text" class="time-field start-time" placeholder="08:00" maxlength="5">
+                    <span style="color:#444">-</span>
+                    <input type="text" class="time-field end-time" placeholder="17:00" maxlength="5">
+                </div>
+            </div>
+            <div class="schedule-row" data-day="3">
+                <label><input type="checkbox" class="day-checkbox"> <span class="day-label">Среда</span></label>
+                <div class="time-inputs">
+                    <input type="text" class="time-field start-time" placeholder="08:00" maxlength="5">
+                    <span style="color:#444">-</span>
+                    <input type="text" class="time-field end-time" placeholder="17:00" maxlength="5">
+                </div>
+            </div>
+            <div class="schedule-row" data-day="4">
+                <label><input type="checkbox" class="day-checkbox"> <span class="day-label">Четверг</span></label>
+                <div class="time-inputs">
+                    <input type="text" class="time-field start-time" placeholder="08:00" maxlength="5">
+                    <span style="color:#444">-</span>
+                    <input type="text" class="time-field end-time" placeholder="17:00" maxlength="5">
+                </div>
+            </div>
+            <div class="schedule-row" data-day="5">
+                <label><input type="checkbox" class="day-checkbox"> <span class="day-label">Пятница</span></label>
+                <div class="time-inputs">
+                    <input type="text" class="time-field start-time" placeholder="08:00" maxlength="5">
+                    <span style="color:#444">-</span>
+                    <input type="text" class="time-field end-time" placeholder="16:00" maxlength="5">
+                </div>
+            </div>
+            <div class="schedule-row" data-day="6">
+                <label><input type="checkbox" class="day-checkbox"> <span class="day-label">Суббота</span></label>
+                <div class="time-inputs">
+                    <input type="text" class="time-field start-time" placeholder="08:00" maxlength="5">
+                    <span style="color:#444">-</span>
+                    <input type="text" class="time-field end-time" placeholder="17:00" maxlength="5">
+                </div>
+            </div>
+            <div class="schedule-row" data-day="0">
+                <label><input type="checkbox" class="day-checkbox"> <span class="day-label">Воскресенье</span></label>
+                <div class="time-inputs">
+                    <input type="text" class="time-field start-time" placeholder="08:00" maxlength="5">
+                    <span style="color:#444">-</span>
+                    <input type="text" class="time-field end-time" placeholder="17:00" maxlength="5">
+                </div>
+            </div>
+        </div>
+
+        <div class="modal-buttons">
+            <button class="modal-btn btn-cancel" id="btnModalCancel">ОТМЕНА</button>
+            <button class="modal-btn btn-save" id="btnModalSave">СОХРАНИТЬ</button>
+        </div>
+    </div>
+</div>
+
 
 <script>
 const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby899DghhixLfbMIY_TblWR5y9_cNznKP37XZ_WdNpXDVLk_VQdkqoZjUT4vgTsw31sww/exec';
@@ -467,7 +618,83 @@ async function init() {
         }
     });
     
-    updateClocks();
+    // --- УПРАВЛЕНИЕ МОДАЛЬНЫМ ОКНОМ И МАСКОЙ ВРЕМЕНИ ---
+    const timerModal = document.getElementById("timerModal");
+    const countdownTimer = document.getElementById("countdownTimer");
+    const btnModalCancel = document.getElementById("btnModalCancel");
+    const btnModalSave = document.getElementById("btnModalSave");
+    const timeFields = document.querySelectorAll(".time-field");
+    const dayCheckboxes = document.querySelectorAll(".day-checkbox");
+
+    // 1. Открытие по тапу на цифры таймера
+    countdownTimer.addEventListener("click", () => {
+        timerModal.style.display = "flex";
+    });
+
+    // 2. Закрытие окна по кнопке Отмена
+    btnModalCancel.addEventListener("click", () => {
+        timerModal.style.display = "none";
+    });
+
+    // 3. Интерактив: если чекбокс дня выключен — блокируем его поля ввода
+    dayCheckboxes.forEach(cb => {
+        const row = cb.closest(".schedule-row");
+        const inputs = row.querySelectorAll(".time-field");
+        
+        // Начальное состояние
+        inputs.forEach(input => input.disabled = !cb.checked);
+
+        cb.addEventListener("change", () => {
+            inputs.forEach(input => input.disabled = !cb.checked);
+        });
+    });
+
+    // 4. ЖЕСТКАЯ МАСКА ВВОДА ВРЕМЕНИ (ЧЧ:ММ в формате 24H)
+    timeFields.forEach(field => {
+        field.addEventListener("input", (e) => {
+            let value = e.target.value.replace(/\D/g, ""); // Удаляем всё, кроме цифр
+            let formatted = "";
+
+            if (value.length > 0) {
+                // Валидация первого знака часов (0, 1, 2)
+                if (!["0", "1", "2"].includes(value[0])) value = "";
+            }
+            if (value.length > 1) {
+                // Валидация часов целиком (не больше 23)
+                const hours = parseInt(value.substring(0, 2), 10);
+                if (hours > 23) value = value[0];
+            }
+            if (value.length > 2) {
+                // Валидация первого знака минут (0-5)
+                if (parseInt(value[2], 10) > 5) value = value.substring(0, 2);
+            }
+
+            // Собираем итоговую строку с двоеточием
+            if (value.length <= 2) {
+                formatted = value;
+            } else {
+                formatted = value.substring(0, 2) + ":" + value.substring(2, 4);
+            }
+
+            e.target.value = formatted;
+        });
+
+        // Дополнительная проверка при потере фокуса (если ввели огрызок вроде "12:")
+        field.addEventListener("blur", (e) => {
+            const val = e.target.value;
+            if (val.length > 0 && val.length < 5) {
+                e.target.value = ""; // Сбрасываем некорректный формат
+            }
+        });
+    });
+
+    // 5. Кнопка "Сохранить" (Пока просто закрывает окно, задел под localStorage)
+    btnModalSave.addEventListener("click", () => {
+        // Здесь в следующем релизе соберем данные и перепишем логику расчетов
+        timerModal.style.display = "none";
+    });
+	
+	updateClocks();
     setInterval(updateClocks, 1000);        
     setInterval(fetchUTCTime, 300000);      
     setInterval(fetchRealWeather, 1800000); 
