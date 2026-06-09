@@ -322,47 +322,46 @@ body {
 
 <div class="currency-chart-area">
     <div class="tradingview-widget-container" style="height:100%;width:100%">
-      <div id="tradingview_currency" style="height:100%;width:100%"></div>
-      <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
-      <script type="text/javascript">
-      new TradingView.MediumWidget({
-        "symbols": [
-          [
-            "Доллар / Тенге",
-            "FX_IDC:USDKZT|1M"
-          ],
-          [
-            "Рубль / Тенге",
-            "FX_IDC:RUBKZT|1M"
-          ],
-          [
-            "Евро / Тенге",
-            "FX_IDC:EURKZT|1M"
-          ]
-        ],
-        "chartOnly": false,
-        "width": "100%",
-        "height": "100%",
-        "locale": "ru",
-        "colorTheme": "dark",
-        "gridLineColor": "rgba(42, 46, 57, 0.1)",
-        "fontColor": "#787B86",
-        "isTransparent": true,
-        "autosize": true,
-        "showVolume": false,
-        "scalePosition": "no",
-        "scaleMode": "Normal",
-        "fontFamily": "Consolas, monospace",
-        "noTimeScale": false,
-        "valuesTracking": "1",
-        "changeMode": "price-and-percent",
-        "chartType": "line",
-        "container_id": "tradingview_currency"
-      });
-      </script>
+        <div id="tradingview_currency" style="height:100%;width:100%"></div>
+        <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
+        <script type="text/javascript">
+        new TradingView.MediumWidget({
+            "symbols": [
+                [
+                    "Доллар / Тенге",
+                    "FX_IDC:USDKZT|1M"
+                ],
+                [
+                    "Евро / Тенге",
+                    "FX_IDC:EURKZT|1M"
+                ],
+                [
+                    "Евро / Доллар",
+                    "FX:EURUSD|1M"
+                ]
+            ],
+            "chartOnly": false,
+            "width": "100%",
+            "height": "100%",
+            "locale": "ru",
+            "colorTheme": "dark",
+            "gridLineColor": "rgba(42, 46, 57, 0.1)",
+            "fontColor": "#787B86",
+            "isTransparent": true,
+            "autosize": true,
+            "showVolume": false,
+            "scalePosition": "no",
+            "scaleMode": "Normal",
+            "fontFamily": "Consolas, monospace",
+            "noTimeScale": false,
+            "valuesTracking": "1",
+            "changeMode": "price-and-percent",
+            "chartType": "line",
+            "container_id": "tradingview_currency"
+        });
+        </script>
     </div>
-    </div>
-
+</div>
 <div class="weather-static-panel" id="weatherBlock">
     <div class="weather-title">📡 МЕТЕОСТАНЦИЯ</div>
     <div style="color: #aaa;">Связь со спутником...</div>
