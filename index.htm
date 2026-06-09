@@ -14,7 +14,876 @@ body {
     padding: 0;
     height: 100vh;
     overflow: hidden;
+}<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OrdoSkipit</title>
+<style>
+/* --- ОБЩЕСТРАНИЧНОЕ: Базовые стили для всего документа --- */
+body {
+    background: #111;
+    color: #eee;
+    font-family: Consolas, monospace;
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+    overflow: hidden;
 }
+
+
+
+/* --- КОНТЕЙНЕР ДЛЯ ГРАФИКА ВАЛЮТ --- */
+.currency-chart-area {
+    position: fixed;
+    top: 100px; /* Отступ сверху, чтобы не перекрывать плашки времени и погоды */
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80%;
+    height: calc(67vh - 120px); /* Занимает верхние две трети экрана */
+    background: #141414;
+    border: 1px solid #222;
+    border-radius: 8px;
+    overflow: hidden;
+    z-index: 500;
+}
+
+/* Адаптив для мобильных */
+@media (max-width: 768px) {
+    .currency-chart-area {
+        top: 250px; /* Опускаем ниже верхних панелей на мобилке */
+        width: 95%;
+        height: calc(67vh - 260px);
+    }
+}
+
+/* --- БЛОК ПОГОДЫ --- */
+
+.weather-static-panel {
+    position: fixed;
+    left: 20px;
+    top: 20px;
+    text-align: left;
+    background: rgba(26, 26, 36, 0.7);
+    padding: 12px 15px;
+    border-radius: 8px;
+    border-left: 4px solid #00e5ff;
+    font-size: 13px;
+    line-height: 1.6;
+    max-width: 300px;
+    z-index: 1000;
+    cursor: pointer; /* Показываем, что блок кликабельный */
+    user-select: none;
+}
+
+/* Контейнер для скрытых деталей погоды */
+.weather-details {
+    overflow: hidden;
+    max-height: 0; /* По умолчанию всё скрыто */
+    transition: max-height 0.3s ease-out, margin-top 0.3s ease;
+    opacity: 0;
+    transition: all 0.3s ease-in-out;
+}
+
+/* Класс, который JS будет вешать при разворачивании */
+.weather-details.expanded {
+    max-height: 100px; /* Высота с запасом для трех строк */
+    margin-top: 8px;
+    opacity: 1;
+}
+
+.weather-title {
+    color: #00e5ff;
+    font-weight: bold;
+    margin-bottom: 5px;
+    font-size: 14px;
+}
+
+/* --- ЧАСЫ И ТАЙМЕР --- */
+.control-panel-corner {
+    position: fixed;
+    right: 30px;
+    top: 20px;
+    background: rgba(20, 20, 20, 0.8);
+    padding: 12px 20px;
+    border-radius: 8px;
+    border: 1px solid #222;
+    z-index: 999;
+    text-align: right;
+}
+.flex-time-row {
+    display: flex;
+    align-items: baseline;
+    gap: 25px;
+}
+.time-block, .timer-block {
+    text-align: right;
+}
+.timezone-sub, .timer-sub {
+    font-size: 11px;
+    color: #666;
+    display: block;
+    margin-bottom: 2px;
+}
+.clock-digits, .timer-digits {
+    font-size: 24px;
+    font-weight: bold;
+}
+.clock-digits { color: #fff; }
+.timer-digits { transition: color 0.5s ease; }
+
+/* --- ORDOSKIPIT: ГЛАВНАЯ ЗОНА ТАБЛИЦЫ --- */
+.main-content-area {
+    position: fixed;
+    height: calc(33vh - 120px); /* Занимает треть экрана минус высота панели ввода */
+    bottom: 115px; /* Поднята ровно над панелью ввода */
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80%; 
+    background: rgba(20, 20, 20, 0.9);
+    border: 1px solid #222;
+    border-radius: 8px;
+    padding: 20px;
+    box-sizing: border-box;
+    overflow-y: auto; 
+    overflow-x: hidden;
+    z-index: 997;
+}
+.table-row { 
+    border-bottom: 1px solid #222; 
+    padding: 10px 0; 
+    font-size: 14px; /* Базовый размер для ПК */
+    text-align: left; 
+}
+
+/* --- ORDOSKIPIT: НИЖНИЙ БЛОК ВВОДА ДАННЫХ --- */
+.input-panel-bottom {
+    position: fixed;
+    bottom: 42px; /* Прижали ближе к бегущей строке (40px) */
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80%;
+    background: rgba(20, 20, 20, 0.95);
+    border: 1px dashed #333;
+    padding: 15px;
+    border-radius: 8px;
+    box-sizing: border-box;
+    z-index: 998;
+}
+.flex-input-row {
+    display: flex; 
+    gap: 10px;
+}
+
+/* --- БЕГУЩАЯ СТРОКА --- */
+.space-marquee {
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    background: #000;
+    height: 40px;
+    line-height: 40px;
+    color: #00ffaa;
+    font-size: 14px;
+    border-top: 1px solid #333;
+}
+
+/* --- АДАПТИВНОСТЬ ДЛЯ МОБИЛЬНЫХ УСТРОЙСТВ (Экраны до 768px) --- */
+@media (max-width: 768px) {
+    body {
+        overflow: auto; /* Разрешаем скролл самой страницы, если виджеты не влезают */
+    }
+    
+    /* Перестраиваем верхние панели, чтобы не накладывались */
+    .weather-static-panel {
+        position: absolute;
+        left: 5%;
+        top: 10px;
+        width: 90%;
+        max-width: none;
+        box-sizing: border-box;
+    }
+    .control-panel-corner {
+        position: absolute;
+        left: 5%;
+        top: 135px;
+        width: 90%;
+        box-sizing: border-box;
+        text-align: center;
+    }
+    .flex-time-row {
+        justify-content: center;
+    }
+    .time-block, .timer-block {
+        text-align: center;
+    }
+
+    /* Главная зона таблицы подстраивается под мобильный экран */
+    .main-content-area {
+        height: calc(33vh - 160px); /* Адаптивная высота под мобильный ввод */
+        bottom: 155px;
+        top: auto; /* Сбрасываем верхнюю привязку */
+        width: 95%;
+        padding: 10px;
+    }
+    
+    /* КРУПНЫЙ ШРИФТ ДЛЯ ТЕЛЕФОНА */
+    .table-row {
+        font-size: 16px; /* Сообщения на телефоне станут крупнее и читаемее */
+        padding: 12px 0;
+    }
+
+    /* Блок ввода перебиваем в вертикальный режим, чтобы удобно тапать пальцем */
+    .input-panel-bottom {
+        bottom: 42px;
+        width: 95%;
+        padding: 10px;
+    }
+    .flex-input-row {
+        flex-direction: column; /* Элементы встают друг под друга */
+        gap: 8px;
+    }
+    #inputAuthor {
+        width: 100% !important; /* Автор на всю ширину */
+    }
+    #inputAuthor, #inputText, #btnSubmit {
+        font-size: 16px; /* Крупный шрифт для полей, чтобы iOS/Android не зумили экран при вводе */
+        padding: 10px;
+    }
+}
+
+
+/* --- МОДАЛЬНОЕ ОКНО НАСТРОЕК ТАЙМЕРА --- */
+.modal-overlay {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.85);
+    display: none; /* По умолчанию скрыто */
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+}
+.modal-window {
+    background: #15151c;
+    border: 1px solid #00e5ff;
+    border-radius: 8px;
+    padding: 20px;
+    width: 90%;
+    max-width: 450px;
+    box-shadow: 0 0 20px rgba(0, 229, 255, 0.2);
+}
+.modal-header {
+    color: #00e5ff;
+    font-size: 14px;
+    font-weight: bold;
+    margin-bottom: 15px;
+    border-bottom: 1px dashed #333;
+    padding-bottom: 8px;
+    text-align: center;
+}
+.schedule-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    font-size: 13px;
+}
+.day-label {
+    width: 100px;
+    color: #aaa;
+}
+.time-inputs {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+.time-field {
+    width: 55px;
+    background: #222;
+    color: #fff;
+    border: 1px solid #444;
+    padding: 5px;
+    border-radius: 4px;
+    text-align: center;
+    font-family: inherit;
+}
+.time-field:disabled {
+    background: #111;
+    color: #444;
+    border-color: #222;
+}
+.modal-buttons {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+}
+.modal-btn {
+    flex: 1;
+    padding: 10px;
+    border-radius: 4px;
+    font-family: inherit;
+    font-weight: bold;
+    cursor: pointer;
+    border: none;
+}
+.btn-save { background: #00e5ff; color: #111; }
+.btn-cancel { background: #333; color: #ccc; }
+
+
+</style>
+</head>
+<body>
+
+<div class="currency-chart-area">
+    <div class="tradingview-widget-container" style="height:100%;width:100%">
+      <div id="tradingview_currency" style="height:100%;width:100%"></div>
+      <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
+      <script type="text/javascript">
+      new TradingView.MediumWidget({
+        "symbols": [
+          [
+            "Доллар / Тенге",
+            "FX_IDC:USDKZT|1M"
+          ],
+          [
+            "Рубль / Тенге",
+            "FX_IDC:RUBKZT|1M"
+          ],
+          [
+            "Евро / Тенге",
+            "FX_IDC:EURKZT|1M"
+          ]
+        ],
+        "chartOnly": false,
+        "width": "100%",
+        "height": "100%",
+        "locale": "ru",
+        "colorTheme": "dark",
+        "gridLineColor": "rgba(42, 46, 57, 0.1)",
+        "fontColor": "#787B86",
+        "isTransparent": true,
+        "autosize": true,
+        "showVolume": false,
+        "scalePosition": "no",
+        "scaleMode": "Normal",
+        "fontFamily": "Consolas, monospace",
+        "noTimeScale": false,
+        "valuesTracking": "1",
+        "changeMode": "price-and-percent",
+        "chartType": "line",
+        "container_id": "tradingview_currency"
+      });
+      </script>
+    </div>
+    </div>
+
+<div class="weather-static-panel" id="weatherBlock">
+    <div class="weather-title">📡 МЕТЕОСТАНЦИЯ</div>
+    <div style="color: #aaa;">Связь со спутником...</div>
+</div>
+
+<div class="control-panel-corner">
+    <div class="flex-time-row">
+        <div class="time-block">
+            <span id="timezoneLabel" class="timezone-sub">Время [ UTC ]</span>
+            <div id="normalClock" class="clock-digits">--:--:--</div>
+        </div>
+        <div class="timer-block">
+            <span id="timerLabel" class="timer-sub">Загрузка...</span>
+            <div id="countdownTimer" class="timer-digits">--:--:--</div>
+        </div>
+    </div>
+</div>
+
+<div class="main-content-area" id="dbDataContainer">
+    OrdoSkipit: инициализация потока данных...
+</div>
+
+<div class="input-panel-bottom">
+    <span style="color: #00e5ff; font-size: 12px; display: block; margin-bottom: 5px;">[ ВВОД НОВЫХ ДАННЫХ В ORDOSKIPIT ]</span>
+    <div class="flex-input-row">
+        <input type="text" id="inputAuthor" placeholder="Автор (имя сохранится)" style="background: #222; color: #fff; border: 1px solid #444; padding: 8px; border-radius: 4px; font-family: inherit; width: 25%;">
+        <input type="text" id="inputText" placeholder="Введите текст сообщения..." style="background: #222; color: #fff; border: 1px solid #444; padding: 8px; border-radius: 4px; font-family: inherit; flex-grow: 1;">
+        <button id="btnSubmit" style="background: #00e5ff; color: #111; border: none; padding: 8px 15px; border-radius: 4px; font-family: inherit; font-weight: bold; cursor: pointer; transition: background 0.2s;">ОТПРАВИТЬ</button>
+    </div>
+    <div id="sendStatus" style="font-size: 11px; margin-top: 5px; color: #666;"></div>
+</div>
+
+<marquee class="space-marquee" scrollamount="4" id="spaceMarquee">
+    <span id="spaceLenta">Загрузка межпланетных календарей...</span>
+</marquee>
+
+
+<div class="modal-overlay" id="timerModal">
+    <div class="modal-window">
+        <div class="modal-header">[ НАСТРОЙКА РАБОЧИХ СМЕН ORDOSKIPIT ]</div>
+        
+        <div id="scheduleContainer">
+            <div class="schedule-row" data-day="1">
+                <label><input type="checkbox" class="day-checkbox"> <span class="day-label">Понедельник</span></label>
+                <div class="time-inputs">
+                    <input type="text" class="time-field start-time" placeholder="08:00" maxlength="5">
+                    <span style="color:#444">-</span>
+                    <input type="text" class="time-field end-time" placeholder="17:00" maxlength="5">
+                </div>
+            </div>
+            <div class="schedule-row" data-day="2">
+                <label><input type="checkbox" class="day-checkbox"> <span class="day-label">Вторник</span></label>
+                <div class="time-inputs">
+                    <input type="text" class="time-field start-time" placeholder="08:00" maxlength="5">
+                    <span style="color:#444">-</span>
+                    <input type="text" class="time-field end-time" placeholder="17:00" maxlength="5">
+                </div>
+            </div>
+            <div class="schedule-row" data-day="3">
+                <label><input type="checkbox" class="day-checkbox"> <span class="day-label">Среда</span></label>
+                <div class="time-inputs">
+                    <input type="text" class="time-field start-time" placeholder="08:00" maxlength="5">
+                    <span style="color:#444">-</span>
+                    <input type="text" class="time-field end-time" placeholder="17:00" maxlength="5">
+                </div>
+            </div>
+            <div class="schedule-row" data-day="4">
+                <label><input type="checkbox" class="day-checkbox"> <span class="day-label">Четверг</span></label>
+                <div class="time-inputs">
+                    <input type="text" class="time-field start-time" placeholder="08:00" maxlength="5">
+                    <span style="color:#444">-</span>
+                    <input type="text" class="time-field end-time" placeholder="17:00" maxlength="5">
+                </div>
+            </div>
+            <div class="schedule-row" data-day="5">
+                <label><input type="checkbox" class="day-checkbox"> <span class="day-label">Пятница</span></label>
+                <div class="time-inputs">
+                    <input type="text" class="time-field start-time" placeholder="08:00" maxlength="5">
+                    <span style="color:#444">-</span>
+                    <input type="text" class="time-field end-time" placeholder="16:00" maxlength="5">
+                </div>
+            </div>
+            <div class="schedule-row" data-day="6">
+                <label><input type="checkbox" class="day-checkbox"> <span class="day-label">Суббота</span></label>
+                <div class="time-inputs">
+                    <input type="text" class="time-field start-time" placeholder="08:00" maxlength="5">
+                    <span style="color:#444">-</span>
+                    <input type="text" class="time-field end-time" placeholder="17:00" maxlength="5">
+                </div>
+            </div>
+            <div class="schedule-row" data-day="0">
+                <label><input type="checkbox" class="day-checkbox"> <span class="day-label">Воскресенье</span></label>
+                <div class="time-inputs">
+                    <input type="text" class="time-field start-time" placeholder="08:00" maxlength="5">
+                    <span style="color:#444">-</span>
+                    <input type="text" class="time-field end-time" placeholder="17:00" maxlength="5">
+                </div>
+            </div>
+        </div>
+
+        <div class="modal-buttons">
+            <button class="modal-btn btn-cancel" id="btnModalCancel">ОТМЕНА</button>
+            <button class="modal-btn btn-save" id="btnModalSave">СОХРАНИТЬ</button>
+        </div>
+    </div>
+</div>
+
+
+<script>
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby899DghhixLfbMIY_TblWR5y9_cNznKP37XZ_WdNpXDVLk_VQdkqoZjUT4vgTsw31sww/exec';
+
+/* --- БЛОК ТАБЛИЦЫ: Загрузка --- */
+async function loadTableData() {
+    const container = document.getElementById('dbDataContainer');
+    try {
+        const response = await fetch(SCRIPT_URL);
+        const data = await response.json(); 
+        container.innerHTML = data.map(row => `
+            <div class="table-row">
+                <span style="color:#00e5ff;">[${row.author || 'SYSTEM'}]</span>: ${row.text || '...' }
+            </div>
+        `).join('');
+    } catch (e) {
+        container.innerHTML = `<div style="color:red;">Ошибка OrdoSkipit: ${e.message}</div>`;
+    }
+}
+    
+const MS_IN_DAY = 86400000;
+const LUNAR_CYCLE_MS = 2551443180;      
+const SUN_ROTATION_MS = 2192832000;     
+const VENUS_YEAR_EARTH_DAYS = 224.7;    
+const VENUS_SOL_EARTH_DAYS = 116.75;    
+const MARS_YEAR_EARTH_DAYS = 686.98;    
+const MARS_SOL_EARTH_DAYS = 1.025957;   
+
+// ГЛОБАЛЬНЫЙ ГРАФИК ПО УМОЛЧАНИЮ (теперь доступен всем функциям)
+const defaultSchedule = {
+    1: { active: true,  start: "08:00", end: "17:15" }, // ПН
+    2: { active: true,  start: "08:00", end: "17:15" }, // ВТ
+    3: { active: true,  start: "08:00", end: "17:15" }, // СР
+    4: { active: true,  start: "08:00", end: "17:15" }, // ЧТ
+    5: { active: true,  start: "08:00", end: "16:00" }, // ПТ
+    6: { active: false, start: "08:00", end: "17:00" }, // СБ
+    0: { active: false, start: "08:00", end: "17:00" }  // ВС
+};
+
+let baseTime = null; 
+let lastFetch = null; 
+let userTimezone = "UTC"; 
+
+const dom = {
+    weather: document.getElementById("weatherBlock"),
+    timezone: document.getElementById("timezoneLabel"),
+    clock: document.getElementById("normalClock"),
+    timerLabel: document.getElementById("timerLabel"),
+    timer: document.getElementById("countdownTimer"),
+    spaceLenta: document.getElementById("spaceLenta")
+};
+
+async function fetchUTCTime() {
+    try {
+        const res = await fetch('https://worldtimeapi.org/api/ip');
+        const data = await res.json();
+        baseTime = new Date(data.datetime);
+        lastFetch = Date.now();
+        userTimezone = data.timezone;
+    } catch (err) {
+        console.error("Ошибка сети, переход на системное время:", err);
+        baseTime = new Date();
+        lastFetch = Date.now();
+        userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    }
+}
+
+async function fetchRealWeather() {
+    try {
+        const res = await fetch('https://wttr.in/?format=j1');
+        const data = await res.json();
+        const current = data.current_condition[0];
+        const city = data.nearest_area[0].areaName[0].value;
+        const temp = current.temp_C;
+        const desc = current.lang_ru ? current.lang_ru[0].value : current.weatherDesc[0].value;
+        const humidity = current.humidity;
+        const windMs = (parseFloat(current.windspeedKmph) / 3.6).toFixed(1);
+
+        dom.weather.innerHTML = `
+            <div class="weather-title">📍 ПОГОДА (${city}) <span style="font-size:11px; color:#666; float:right;">▼</span></div>
+            <div>• Температура: <b>${temp}°C</b></div>
+            <div class="weather-details" id="weatherDetails">
+                <div>• Состояние: <span>${desc}</span></div>
+                <div>• Влажность: <span>${humidity}%</span></div>
+                <div>• Ветер: <span>${windMs} м/с</span></div>
+            </div>
+        `;
+        
+    } catch (err) {
+        console.error("Не удалось получить погоду:", err);
+        dom.weather.innerHTML = `
+            <div class="weather-title">📍 МЕТЕОСТАНЦИЯ</div>
+            <div style="color: #ff5555;">Автономный режим (ошибка сети)</div>
+        `;
+    }
+}
+
+function isWeekend(day) {
+    return day === 0 || day === 6;
+}
+
+function updateClocks() {
+    if (!baseTime) return;
+
+    const now = new Date(baseTime.getTime() + (Date.now() - lastFetch));
+    dom.timezone.textContent = `Время [ ${userTimezone} ]`;
+
+    const h = String(now.getHours()).padStart(2, '0');
+    const m = String(now.getMinutes()).padStart(2, '0');
+    const s = String(now.getSeconds()).padStart(2, '0');
+    dom.clock.textContent = `${h}:${m}:${s}`;
+
+    const currentDay = now.getDay();
+    const year = now.getFullYear();
+    const month = now.getMonth();
+    const date = now.getDate();
+
+    // Читаем настройки из localStorage или берем дефолтные
+    const saved = localStorage.getItem("ordo_schedule");
+    const schedule = saved ? JSON.parse(saved) : defaultSchedule;
+
+    let labelText = "Смен не найдено";
+    let targetTime = null;
+    let dynamicColor = "#ff5555"; 
+
+    // Получаем настройки для сегодняшнего дня
+    const todaySettings = schedule[currentDay];
+
+    if (todaySettings && todaySettings.active) {
+        // Парсим время начала и конца сегодняшней смены
+        const [sH, sM] = todaySettings.start.split(":").map(Number);
+        const [eH, eM] = todaySettings.end.split(":").map(Number);
+
+        const startOfWorkToday = new Date(year, month, date, sH, sM, 0, 0);
+        const endOfWorkToday = new Date(year, month, date, eH, eM, 0, 0);
+
+        if (now >= startOfWorkToday && now < endOfWorkToday) {
+            // МЫ НА СМЕНЕ
+            labelText = "До завершения:";
+            targetTime = endOfWorkToday;
+            
+            // Плавный градиент цвета от начала до конца смены
+            const progress = (now - startOfWorkToday) / (endOfWorkToday - startOfWorkToday);
+            const r = Math.floor(255 - (255 * progress));
+            const g = Math.floor(85 + (170 * progress));
+            const b = Math.floor(85 + (42 * progress));
+            dynamicColor = `rgb(${r}, ${g}, ${b})`;
+        }
+    }
+
+    // Если мы не на смене (выходной или рабочее время еще не пришло / уже ушло)
+    if (!targetTime) {
+        labelText = "До старта:";
+        
+        // Ищем ближайшую будущую активную смену в расписании (перебираем до 7 дней вперед)
+        for (let i = 0; i <= 7; i++) {
+            const checkDate = new Date(year, month, date + i);
+            const checkDay = checkDate.getDay();
+            const daySettings = schedule[checkDay];
+
+            if (daySettings && daySettings.active) {
+                const [sH, sM] = daySettings.start.split(":").map(Number);
+                const possibleTarget = new Date(checkDate.getFullYear(), checkDate.getMonth(), checkDate.getDate(), sH, sM, 0, 0);
+                
+                // Если эта смена еще впереди — берем её!
+                if (possibleTarget > now) {
+                    targetTime = possibleTarget;
+                    break;
+                }
+            }
+        }
+    }
+
+    // Обновляем цвет таймера
+    if (dom.timer.style.color !== dynamicColor) {
+        dom.timer.style.color = dynamicColor;
+    }
+
+    // Если цель найдена — считаем обратный отсчет, иначе выводим нули
+    if (targetTime) {
+        const diffMs = targetTime - now;
+        const diffHours = Math.floor(diffMs / 3600000);
+        const diffMinutes = Math.floor((diffMs % 3600000) / 60000);
+        const diffSeconds = Math.floor((diffMs % 60000) / 1000);
+
+        dom.timerLabel.textContent = labelText;
+        dom.timer.textContent = `${String(diffHours).padStart(2, '0')}:${String(diffMinutes).padStart(2, '0')}:${String(diffSeconds).padStart(2, '0')}`;
+    } else {
+        dom.timerLabel.textContent = "График пуст";
+        dom.timer.textContent = "00:00:00";
+        dom.timer.style.color = "#666";
+    }
+
+    // ОДНА ОКОНЧАТЕЛЬНАЯ ПРОВЕРКА: Если данных в кэше нет — жестко перезаписываем надписи
+    if (!saved) {
+        dom.timerLabel.textContent = "Конфигурация:";
+        dom.timer.textContent = "Нажмите чтобы настроить";
+        dom.timer.style.color = "#00e5ff";
+        dom.timer.style.fontSize = "13px"; // Уменьшаем размер индивидуально в два раза
+    } else {
+        dom.timer.style.fontSize = "24px"; // Возвращаем исходный крупный размер для цифр таймера
+    }
+
+    // --- ОСТАЛЬНОЙ КОСМИЧЕСКИЙ КОД (Луна, Марс и т.д.) ОСТАЕТСЯ БЕЗ ИЗМЕНЕНИЙ ---
+    const currentMs = now.getTime();
+    const totalEarthDays = (currentMs - Date.UTC(1, 0, 1, 0, 0, 0, 0)) / MS_IN_DAY;
+    const venusYearsTotal = totalEarthDays / VENUS_YEAR_EARTH_DAYS;
+    const venusDaysTotal = totalEarthDays / VENUS_SOL_EARTH_DAYS;
+    const marsYearsTotal = totalEarthDays / MARS_YEAR_EARTH_DAYS;
+    const marsSolsTotal = totalEarthDays / MARS_SOL_EARTH_DAYS;
+
+    const moonCycles = (currentMs - Date.UTC(2000, 0, 6, 18, 14, 0)) / LUNAR_CYCLE_MS;
+    const moonAgeDays = (moonCycles % 1) * 29.53059;
+    
+    let moonPhaseText = "";
+    let moonIllumination = 0;
+    if (moonAgeDays < 14.765) {
+        moonPhaseText = "Растущая";
+        moonIllumination = ((moonAgeDays / 14.765) * 100).toFixed(1);
+    } else {
+        moonPhaseText = "Убывающая";
+        moonIllumination = (((29.53059 - moonAgeDays) / 14.765) * 100).toFixed(1);
+    }
+    if (moonAgeDays < 0.5 || moonAgeDays > 29.0) { moonPhaseText = "Новолуние"; moonIllumination = "0"; }
+    else if (Math.abs(moonAgeDays - 14.76) < 0.5) { moonPhaseText = "Полнолуние"; moonIllumination = "100"; }
+
+    const sunRotationsTotal = (currentMs - Date.UTC(1853, 10, 9, 12, 0, 0)) / SUN_ROTATION_MS;
+
+    dom.spaceLenta.innerHTML = `🌙 ЛУНА: ${moonPhaseText} (${moonIllumination}%) &nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp; 
+                        🌋 ВЕНЕРА: ${Math.floor(venusDaysTotal) + 1}-ие сутки ${Math.floor(venusYearsTotal) + 1}-го года (${((venusDaysTotal % 1) * 100).toFixed(2)}%) &nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp; 
+                        🚀 МАРС: ${Math.floor(marsSolsTotal) + 1}-ый Сол ${Math.floor(marsYearsTotal) + 1}-го года (${((marsSolsTotal % 1) * 100).toFixed(2)}%) &nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp; 
+                        ☀️ СОЛНЦЕ: ${Math.floor(sunRotationsTotal) + 1}-ый оборот (${((sunRotationsTotal % 1) * 100).toFixed(2)}%)`;
+}
+
+
+async function init() {
+    await loadTableData();
+    setInterval(loadTableData, 60000);
+    
+    await Promise.all([
+        fetchUTCTime(),
+        fetchRealWeather()
+    ]);
+    
+    // --- ОТПРАВКА ДАННЫХ В ТАБЛИЦУ ---
+    const btnSubmit = document.getElementById("btnSubmit");
+    const inputAuthor = document.getElementById("inputAuthor");
+    const inputText = document.getElementById("inputText");
+    const sendStatus = document.getElementById("sendStatus");
+
+    // ПРОВЕРКА КЭША: Если имя уже сохранялось в браузере, подтягиваем его
+    if (localStorage.getItem("ordo_author")) {
+        inputAuthor.value = localStorage.getItem("ordo_author");
+    }
+    
+    btnSubmit.addEventListener("click", async () => {
+        if (!inputAuthor.value.trim() || !inputText.value.trim()) {
+            sendStatus.textContent = "Ошибка: Заполните оба поля!";
+            sendStatus.style.color = "#ff5555";
+            return;
+        }
+
+        btnSubmit.disabled = true;
+        btnSubmit.style.background = "#555";
+        sendStatus.textContent = "Отправка пакета данных...";
+        sendStatus.style.color = "#aaa";
+
+        try {
+            const formData = new URLSearchParams();
+            formData.append("author", inputAuthor.value.trim());
+            formData.append("text", inputText.value.trim());
+
+            await fetch(SCRIPT_URL, {
+                method: "POST",
+                mode: "no-cors", 
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded"
+                },
+                body: formData.toString()
+            });
+
+            sendStatus.textContent = "Данные успешно переданы в OrdoSkipit!";
+            sendStatus.style.color = "#00ffaa";
+
+            // ЗАПОМИНАЕМ АВТОРА: Сохраняем имя в память браузера
+            localStorage.setItem("ordo_author", inputAuthor.value.trim());
+            
+            inputText.value = "";
+            setTimeout(loadTableData, 1500);
+
+        } catch (error) {
+            console.error("Ошибка отправки:", error);
+            sendStatus.textContent = `Критический сбой: ${error.message}`;
+            sendStatus.style.color = "#ff5555";
+        } finally {
+            btnSubmit.disabled = false;
+            btnSubmit.style.background = "#00e5ff";
+        }
+    });
+    
+    
+    // --- УПРАВЛЕНИЕ МОДАЛЬНЫМ ОКНОМ И МАСКОЙ ВРЕМЕНИ ---
+    const timerModal = document.getElementById("timerModal");
+    const countdownTimer = document.getElementById("countdownTimer");
+    const btnModalCancel = document.getElementById("btnModalCancel");
+    const btnModalSave = document.getElementById("btnModalSave");
+    const timeFields = document.querySelectorAll(".time-field");
+
+    // Функция загрузки расписания на форму
+    function loadScheduleToForm() {
+        const saved = localStorage.getItem("ordo_schedule");
+        const schedule = saved ? JSON.parse(saved) : defaultSchedule;
+
+        for (const day in schedule) {
+            const row = document.querySelector(`.schedule-row[data-day="${day}"]`);
+            if (!row) continue;
+
+            const cb = row.querySelector(".day-checkbox");
+            const startInput = row.querySelector(".start-time");
+            const endInput = row.querySelector(".end-time");
+
+            cb.checked = schedule[day].active;
+            startInput.value = schedule[day].start;
+            endInput.value = schedule[day].end;
+
+            // Активируем/деактивируем поля в зависимости от чекбокса
+            startInput.disabled = !cb.checked;
+            endInput.disabled = !cb.checked;
+        }
+    }
+
+    // Открытие модалки с актуальными данными
+    countdownTimer.addEventListener("click", () => {
+        loadScheduleToForm();
+        timerModal.style.display = "flex";
+    });
+
+    btnModalCancel.addEventListener("click", () => {
+        timerModal.style.display = "none";
+    });
+
+    // Интерактивное переключение доступности полей при клике на чекбокс
+    document.querySelectorAll(".day-checkbox").forEach(cb => {
+        cb.addEventListener("change", () => {
+            const row = cb.closest(".schedule-row");
+            row.querySelector(".start-time").disabled = !cb.checked;
+            row.querySelector(".end-time").disabled = !cb.checked;
+        });
+    });
+
+    // Кнопка "Сохранить": собираем данные с формы и пишем в localStorage
+    btnModalSave.addEventListener("click", () => {
+        const scheduleToSave = {};
+        document.querySelectorAll(".schedule-row").forEach(row => {
+            const day = row.getAttribute("data-day");
+            const cb = row.querySelector(".day-checkbox");
+            const startInput = row.querySelector(".start-time");
+            const endInput = row.querySelector(".end-time");
+
+            scheduleToSave[day] = {
+                active: cb.checked,
+                start: startInput.value || "08:00",
+                end: endInput.value || "17:00"
+            };
+        });
+
+        localStorage.setItem("ordo_schedule", JSON.stringify(scheduleToSave));
+        timerModal.style.display = "none";
+        updateClocks(); // Сразу пересчитываем таймер по новым правилам
+    });
+    
+    
+    // --- ИНТЕРАКТИВНАЯ ПОГОДА (СВЕРНУТЬ/РАЗВЕРНУТЬ) ---
+    const weatherBlock = document.getElementById("weatherBlock");
+    weatherBlock.addEventListener("click", () => {
+        const details = document.getElementById("weatherDetails");
+        if (details) {
+            details.classList.toggle("expanded");
+            
+            // Меняем стрелочку в заголовке для красоты
+            const arrow = weatherBlock.querySelector(".weather-title span");
+            if (arrow) {
+                arrow.textContent = details.classList.contains("expanded") ? "▲" : "▼";
+            }
+        }
+    });
+    updateClocks();
+    setInterval(updateClocks, 1000);        
+    setInterval(fetchUTCTime, 300000);      
+    setInterval(fetchRealWeather, 1800000); 
+}
+
+init();
+</script>
+
+
+</body>
+</html>
 
 /* --- БЛОК ПОГОДЫ --- */
 
