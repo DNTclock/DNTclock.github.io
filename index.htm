@@ -93,9 +93,9 @@ body {
 
 /* --- ORDOSKIPIT: ГЛАВНАЯ ЗОНА ТАБЛИЦЫ --- */
 .main-content-area {
-    position: absolute;
-    top: 140px; 
-    bottom: 140px; /* Увеличили зазор снизу для удобства мобильного ввода */
+    position: fixed;
+    height: calc(33vh - 120px); /* Занимает треть экрана минус высота панели ввода */
+    bottom: 115px; /* Поднята ровно над панелью ввода */
     left: 50%;
     transform: translateX(-50%);
     width: 80%; 
@@ -106,6 +106,7 @@ body {
     box-sizing: border-box;
     overflow-y: auto; 
     overflow-x: hidden;
+    z-index: 997;
 }
 .table-row { 
     border-bottom: 1px solid #222; 
@@ -117,7 +118,7 @@ body {
 /* --- ORDOSKIPIT: НИЖНИЙ БЛОК ВВОДА ДАННЫХ --- */
 .input-panel-bottom {
     position: fixed;
-    bottom: 50px; 
+    bottom: 42px; /* Прижали ближе к бегущей строке (40px) */
     left: 50%;
     transform: translateX(-50%);
     width: 80%;
@@ -179,8 +180,9 @@ body {
 
     /* Главная зона таблицы подстраивается под мобильный экран */
     .main-content-area {
-        top: 245px;
-        bottom: 195px;
+        height: calc(33vh - 160px); /* Адаптивная высота под мобильный ввод */
+        bottom: 155px;
+        top: auto; /* Сбрасываем верхнюю привязку */
         width: 95%;
         padding: 10px;
     }
@@ -193,7 +195,7 @@ body {
 
     /* Блок ввода перебиваем в вертикальный режим, чтобы удобно тапать пальцем */
     .input-panel-bottom {
-        bottom: 45px;
+        bottom: 42px;
         width: 95%;
         padding: 10px;
     }
@@ -592,7 +594,7 @@ function updateClocks() {
         dom.timer.style.color = "#666";
     }
 
-  // ОДНА ОКОНЧАТЕЛЬНАЯ ПРОВЕРКА: Если данных в кэше нет — жестко перезаписываем надписи
+    // ОДНА ОКОНЧАТЕЛЬНАЯ ПРОВЕРКА: Если данных в кэше нет — жестко перезаписываем надписи
     if (!saved) {
         dom.timerLabel.textContent = "Конфигурация:";
         dom.timer.textContent = "Нажмите чтобы настроить";
